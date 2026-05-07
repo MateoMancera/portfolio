@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astor: Blade of the Monolith — Mateo Mancera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
+<style>
+/* ─── RESET & BASE ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #0B0B0F;
+  --bg-surface: #111118;
+  --bg-card:    #15151E;
+  --bg-hover:   #1C1C28;
+  --indigo:     #6C63FF;
+  --indigo-dim: #2E2A6A;
+  --indigo-glow:rgba(108,99,255,0.15);
+  --coral:      #FF6B6B;
+  --off-white:  #EEEAF8;
+  --muted:      #7A7A9A;
+  --border:     #1E1E2E;
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--off-white);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ─── NOISE OVERLAY ─────────────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--indigo-dim); border-radius: 2px; }
+
+/* ─── TYPOGRAPHY ────────────────────────────────────────────────────────────── */
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; }
+
+/* ─── NAVIGATION ────────────────────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  background: rgba(11,11,15,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.3s;
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--off-white);
+  text-decoration: none;
+  letter-spacing: -0.03em;
+  cursor: pointer;
+}
+.nav-logo span { color: var(--indigo); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+.nav-links a:hover { color: var(--off-white); }
+
+.nav-cta {
+  background: var(--indigo);
+  color: var(--off-white) !important;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background 0.2s, transform 0.15s !important;
+}
+.nav-cta:hover {
+  background: #7B73FF !important;
+  transform: translateY(-1px);
+  color: var(--off-white) !important;
+}
+
+/* ─── PAGES ─────────────────────────────────────────────────────────────────── */
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ─── HOMEPAGE ──────────────────────────────────────────────────────────────── */
+
+/* Hero */
+.hero {
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  padding: 120px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Video background */
+.hero-video-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.hero-video-bg video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 177.78vh;
+  height: 100vh;
+  min-width: 100%;
+  min-height: 56.25vw;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.hero-video-bg video.loaded {
+  opacity: 1;
+}
+.hero-video-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(11,11,15,0.88) 0%,
+    rgba(11,11,15,0.72) 50%,
+    rgba(11,11,15,0.85) 100%
+  );
+  z-index: 1;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Avatar */
+.hero-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--indigo);
+  overflow: hidden;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0s forwards;
+  box-shadow: 0 0 0 4px rgba(108,99,255,0.15);
+}
+.hero-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.hero-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+  top: -100px; right: -100px;
+  pointer-events: none;
+}
+.hero-glow-2 {
+  position: absolute;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(255,107,107,0.06) 0%, transparent 70%);
+  bottom: 0; left: 20%;
+  pointer-events: none;
+}
+
+.hero-content { max-width: 680px; }
+
+.hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--indigo);
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.1s forwards;
+}
+.hero-label::before {
+  content: '';
+  display: block;
+  width: 24px; height: 1px;
+  background: var(--indigo);
+}
+
+.hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 7vw, 88px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--off-white);
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.2s forwards;
+}
+.hero-name .accent { color: var(--indigo); }
+
+.hero-role {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--muted);
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.3s forwards;
+}
+.hero-role strong { color: var(--off-white); font-weight: 500; }
+
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.4s forwards;
+}
+
+.tag {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--bg-surface);
+}
+.tag.highlight {
+  border-color: var(--indigo-dim);
+  color: var(--indigo);
+  background: rgba(108,99,255,0.08);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.5s forwards;
+}
+
+.btn-primary {
+  background: var(--indigo);
+  color: var(--off-white);
+  border: none;
+  padding: 13px 28px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-primary:hover { background: #7B73FF; transform: translateY(-2px); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 13px 28px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, transform 0.15s;
+}
+.btn-secondary:hover {
+  color: var(--off-white);
+  border-color: var(--muted);
+  transform: translateY(-2px);
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  gap: 0;
+  margin: 0 48px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.6s forwards;
+}
+.stat {
+  flex: 1;
+  padding: 24px 32px;
+  border-right: 1px solid var(--border);
+}
+.stat:last-child { border-right: none; }
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--off-white);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.stat-num span { color: var(--indigo); }
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Work section */
+.section {
+  padding: 80px 48px;
+}
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.section-title-large {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--off-white);
+  margin-bottom: 48px;
+}
+
+/* Project cards */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+  position: relative;
+}
+.project-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--indigo-dim);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px var(--indigo-dim);
+}
+
+.project-card-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.project-card-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(21,21,30,0.8) 100%);
+}
+.project-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-card-body {
+  padding: 20px;
+}
+.project-card-studio {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.project-card-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--off-white);
+  margin-bottom: 6px;
+}
+.project-card-role {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.project-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-weight: 500;
+}
+.badge-published {
+  background: rgba(108,99,255,0.15);
+  color: var(--indigo);
+  border: 1px solid var(--indigo-dim);
+}
+.badge-wip {
+  background: rgba(255,107,107,0.1);
+  color: var(--coral);
+  border: 1px solid rgba(255,107,107,0.2);
+}
+.badge-placeholder {
+  background: var(--bg-hover);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.card-arrow {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 14px;
+  transition: background 0.2s, color 0.2s;
+}
+.project-card:hover .card-arrow {
+  background: var(--indigo);
+  color: white;
+}
+
+/* ─── PROJECT PAGE ──────────────────────────────────────────────────────────── */
+#project-page {
+  padding-top: 64px;
+}
+
+/* Project Hero */
+.project-hero {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 0;
+  max-height: 60vh;
+  border-bottom: 1px solid var(--border);
+}
+
+.project-hero-media {
+  background: var(--bg-surface);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.project-hero-media .yt-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.yt-play {
+  width: 64px; height: 64px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.project-hero-meta {
+  padding: 48px 40px;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.project-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: color 0.2s;
+}
+.project-back:hover { color: var(--off-white); }
+
+.project-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--off-white);
+  margin-bottom: 24px;
+}
+
+.meta-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.meta-key {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  min-width: 64px;
+}
+.meta-val {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--off-white);
+}
+
+.btn-download {
+  margin-top: auto;
+  background: var(--indigo);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
+}
+.btn-download:hover { background: #7B73FF; }
+
+/* Skip To widget */
+.skip-widget {
+  position: fixed;
+  bottom: 32px;
+  left: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  width: 180px;
+  z-index: 90;
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.skip-widget.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.skip-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.skip-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+}
+.skip-links a {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 3px 6px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+  display: block;
+}
+.skip-links a:hover { color: var(--off-white); background: var(--bg-hover); }
+.skip-links a.active { color: var(--indigo); background: rgba(108,99,255,0.1); }
+
+/* Project sections */
+.project-body {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 96px 48px 64px;
+}
+
+.proj-section {
+  margin-bottom: 48px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  scroll-margin-top: 80px;
+}
+.proj-section.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.proj-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.proj-section-bar {
+  width: 3px;
+  height: 22px;
+  background: var(--indigo);
+  border-radius: 2px;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+.proj-section-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--off-white);
+}
+
+/* Two-column layout */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.two-col.text-first { grid-template-columns: 1.2fr 1fr; }
+.two-col.img-first { grid-template-columns: 1fr 1.2fr; }
+
+.proj-text {
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(238,234,248,0.75);
+}
+.proj-text p + p { margin-top: 12px; }
+
+/* Image placeholders */
+.img-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  aspect-ratio: 16/9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  position: relative;
+}
+.img-block img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.img-block.tall { aspect-ratio: 4/3; }
+.img-block.wide { aspect-ratio: 21/9; }
+
+/* Image caption */
+.img-caption {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Pillars grid */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.pillar-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.25s;
+}
+.pillar-card:hover { border-color: var(--indigo-dim); }
+.pillar-img {
+  aspect-ratio: 16/9;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 11px;
+}
+.pillar-body { padding: 14px 16px; }
+.pillar-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--off-white);
+  margin-bottom: 6px;
+}
+.pillar-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Image slider */
+.slider {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.slider-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.slider-slide {
+  min-width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(11,11,15,0.75);
+  border: 1px solid var(--border);
+  color: var(--off-white);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+  font-size: 16px;
+  z-index: 2;
+}
+.slider-btn:hover { background: var(--indigo); }
+.slider-btn.prev { left: 12px; }
+.slider-btn.next { right: 12px; }
+.slider-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+.slider-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.slider-dot.active { background: var(--indigo); transform: scale(1.3); }
+
+/* Areas grid */
+.areas-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.area-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.area-card:hover { border-color: var(--indigo-dim); }
+.area-slider { position: relative; }
+.area-img {
+  aspect-ratio: 16/9;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 11px;
+}
+.area-body { padding: 14px 16px; }
+.area-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--off-white);
+  margin-bottom: 5px;
+}
+.area-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+/* Flowchart */
+.flowchart {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+}
+.flowchart-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 24px;
+}
+.flow-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.flow-node {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  flex: 1;
+  max-width: 140px;
+}
+.flow-node-img {
+  aspect-ratio: 16/9;
+  background: var(--bg-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--muted);
+}
+.flow-node-label {
+  padding: 6px 8px;
+  font-size: 9px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.3;
+}
+.flow-arrow {
+  color: var(--indigo);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.flow-connector {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  margin: 0 auto;
+}
+
+/* Gameplay highlights */
+.gameplay-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.gameplay-item {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.gameplay-video {
+  aspect-ratio: 16/9;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.gameplay-yt-btn {
+  width: 48px; height: 48px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.gameplay-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--off-white);
+  margin-bottom: 10px;
+}
+.gameplay-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* Process stages */
+.process-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.process-stage {}
+.process-stage-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--off-white);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.process-stage-title::before {
+  content: '';
+  display: block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--indigo);
+  flex-shrink: 0;
+}
+
+/* Techniques */
+.techniques-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.technique {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.technique-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--off-white);
+  margin-bottom: 8px;
+}
+.technique-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.technique-bullets li {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  padding-left: 16px;
+  position: relative;
+}
+.technique-bullets li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--indigo);
+  font-size: 11px;
+}
+
+/* Walkthrough */
+.walkthrough-video {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.walkthrough-play {
+  width: 72px; height: 72px;
+  background: var(--indigo);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+.walkthrough-play:hover { transform: scale(1.05); background: #7B73FF; }
+
+/* Gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.gallery-item {
+  aspect-ratio: 16/9;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.gallery-item:hover {
+  transform: scale(1.02);
+  border-color: var(--indigo-dim);
+}
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+
+/* ─── ABOUT PAGE ────────────────────────────────────────────────────────────── */
+.about-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 100px 48px;
+}
+.about-label {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--indigo);
+  margin-bottom: 16px;
+}
+.about-title {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--off-white);
+  line-height: 1.05;
+  margin-bottom: 32px;
+}
+.about-body {
+  font-size: 15px;
+  color: rgba(238,234,248,0.7);
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+/* ─── CONTACT PAGE ──────────────────────────────────────────────────────────── */
+.contact-content {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 100px 48px;
+  text-align: center;
+}
+.contact-title {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 16px;
+}
+.contact-sub {
+  color: var(--muted);
+  font-size: 15px;
+  margin-bottom: 40px;
+}
+.contact-email {
+  display: inline-block;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--indigo);
+  text-decoration: none;
+  border-bottom: 1px solid var(--indigo-dim);
+  padding-bottom: 4px;
+  transition: border-color 0.2s;
+}
+.contact-email:hover { border-color: var(--indigo); }
+
+/* ─── FOOTER ────────────────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-copy {
+  font-size: 12px;
+  color: var(--muted);
+}
+.footer-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--off-white);
+}
+
+/* ─── LIGHTBOX ──────────────────────────────────────────────────────────────── */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+.lightbox.active { display: flex; }
+.lightbox img {
+  max-width: 85vw;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+  cursor: default;
+  transition: opacity 0.15s ease;
+}
+.lightbox-close {
+  position: absolute;
+  top: 20px; right: 28px;
+  color: var(--muted);
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+  z-index: 2;
+}
+.lightbox-close:hover { color: var(--off-white); }
+.lightbox-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--off-white);
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 22px;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+  z-index: 2;
+}
+.lightbox-btn:hover { background: var(--indigo); }
+.lightbox-btn.prev { left: 24px; }
+.lightbox-btn.next { right: 24px; }
+.lightbox-counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--font-body);
+}
+
+/* Make slider images show pointer cursor */
+.slider-slide img { cursor: zoom-in; }
+
+/* ─── ANIMATIONS ────────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  nav { padding: 0 24px; }
+  .hero { padding: 100px 24px 60px; }
+  .stats-bar { margin: 0 24px; flex-wrap: wrap; }
+  .stat { min-width: 50%; }
+  .section { padding: 60px 24px; }
+  .projects-grid { grid-template-columns: 1fr; }
+  .project-hero { grid-template-columns: 1fr; }
+  .project-hero-media { min-height: 240px; }
+  .project-hero-meta { border-left: none; border-top: 1px solid var(--border); }
+  .project-body { padding: 40px 24px; }
+  .two-col, .two-col.text-first, .two-col.img-first { grid-template-columns: 1fr; }
+  .pillars-grid { grid-template-columns: 1fr; }
+  .areas-grid { grid-template-columns: 1fr; }
+  .gameplay-item { grid-template-columns: 1fr; }
+  .technique { grid-template-columns: 1fr; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .skip-widget { display: none; }
+  footer { flex-direction: column; gap: 8px; text-align: center; }
+}
+
+@media (max-width: 600px) {
+  .nav-links { gap: 16px; }
+  .hero-name { font-size: 42px; }
+  .stats-bar { flex-direction: column; }
+  .stat { border-right: none; border-bottom: 1px solid var(--border); }
+  .stat:last-child { border-bottom: none; }
+}
+/* ─── LEVEL CONTEXT BAR ─────────────────────────────────────────────────────── */
+.level-context-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.level-tag {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--indigo);
+  background: rgba(108,99,255,0.1);
+  border: 1px solid var(--indigo-dim);
+  border-radius: 4px;
+  padding: 3px 10px;
+}
+
+
+/* ─── LIGHTBOX ───────────────────────────────────────────────────────────────── */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+.lightbox.active { display: flex; }
+.lightbox img {
+  max-width: 85vw;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+  cursor: default;
+  transition: opacity 0.15s ease;
+}
+.lightbox-close {
+  position: absolute;
+  top: 20px; right: 28px;
+  color: var(--muted);
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+  z-index: 2;
+}
+.lightbox-close:hover { color: var(--off-white); }
+.lightbox-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--off-white);
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 22px;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+  z-index: 2;
+}
+.lightbox-btn:hover { background: var(--indigo); }
+.lightbox-btn.prev { left: 24px; }
+.lightbox-btn.next { right: 24px; }
+.lightbox-counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" onclick="window.location.href='portfolio.html'">M<span>M</span></a>
+  <ul class="nav-links">
+    <li><a href="portfolio.html">What I've Done</a></li>
+    <li><a href="portfolio.html#about">About</a></li>
+    <li><a href="Mateo_Mancera_CV.pdf" download="Mateo_Mancera_CV.pdf">Resume</a></li>
+    <li><a class="nav-cta" href="portfolio.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+
+<div class="skip-widget visible" id="skipWidget">
+  <div class="skip-title">Skip To</div>
+  <ul class="skip-links" id="skipLinks">
+    <li><a href="#sec-overview" onclick="scrollTo('sec-overview')">Project Overview</a></li>
+    <li><a href="#sec-role" onclick="scrollTo('sec-role')">My Role</a></li>
+    <li><a href="#sec-chosen" onclick="scrollTo('sec-chosen')">Temple of Chosen</a></li>
+    <!-- <li><a href="#sec-neuma" onclick="scrollTo('sec-neuma')">Temple of Neuma</a></li> -->
+    <li><a href="#sec-observatory" onclick="scrollTo('sec-observatory')">The Observatory</a></li>
+    <li><a href="#sec-monolith" onclick="scrollTo('sec-monolith')">The Monolith</a></li>
+    <li><a href="#sec-supervised" onclick="scrollTo('sec-supervised')">Additional Levels</a></li>
+    <li><a href="#sec-final" onclick="scrollTo('sec-final')">Final Thoughts</a></li>
+  </ul>
+</div>
+
+<div id="project-page" style="padding-top:64px;">
+  <div class="project-hero">
+    <div class="project-hero-media">
+      <video src="videos/heroVideos/astor.mp4" muted loop playsinline autoplay
+        style="width:100%;height:100%;object-fit:cover;"></video>
+    </div>
+    <div class="project-hero-meta">
+      <div class="project-back" onclick="window.location.href='portfolio.html'">← Back to all projects</div>
+      <h1 class="project-title">Astor: Blade of the Monolith</h1>
+      <div class="meta-table">
+        <div class="meta-row"><span class="meta-key">Genre</span><span class="meta-val">3D Action RPG</span></div>
+        <div class="meta-row"><span class="meta-key">Studio</span><span class="meta-val">C2 Game Studio</span></div>
+        <div class="meta-row"><span class="meta-key">Publisher</span><span class="meta-val">Versus Evil · tinyBuild</span></div>
+        <div class="meta-row"><span class="meta-key">Engine</span><span class="meta-val">Unreal Engine 4</span></div>
+        <div class="meta-row"><span class="meta-key">Role</span><span class="meta-val">Lead Level Designer</span></div>
+        <div class="meta-row"><span class="meta-key">Released</span><span class="meta-val">May 2024</span></div>
+        <div class="meta-row"><span class="meta-key">Platforms</span><span class="meta-val">PC · PS5 · Xbox Series · Switch</span></div>
+      </div>
+      <a href="https://store.steampowered.com/app/1989320/Astor_Blade_of_the_Monolith/" target="_blank" class="btn-download" style="text-decoration:none;text-align:center;">Play Now on Steam</a>
+    </div>
+  </div>
+
+  <div class="project-body">
+
+    <!-- ── PROJECT OVERVIEW ── -->
+    <div class="proj-section" id="sec-overview">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Project Overview</h2>
+      </div>
+      <img src="img/Astor/Overview/01.jpg" alt="Astor: Blade of the Monolith" style="width:100%;border-radius:10px;margin-bottom:24px;display:block;">
+      <div class="proj-text">
+          <p>Astor: Blade of the Monolith is a 3D action RPG developed by C2 Game Studio and published by Versus Evil and tinyBuild. Set in a world of androids, ancient temples, and a looming threat named Haken, the game takes players through a series of distinct environments that blend combat, exploration, and light puzzle-solving.</p>
+          <p>As Lead Level Designer I was responsible for the design and implementation of 20+ levels across the full game, from early layout and flow design through encounter placement, environmental storytelling, and final polish. I also mentored and directed the designers who handled levels outside my direct scope, maintaining consistency across the full experience.</p>
+          <p>Below I break down four of the levels I'm most proud of: the opening temple that sets the tone, a vertical tower that recontextualizes everything the player has seen, and the final race to the source of all power on the planet.</p>
+      </div>
+    </div>
+
+    <!-- ── MY ROLE ── -->
+    <div class="proj-section" id="sec-role">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">My Role</h2>
+      </div>
+      <div class="proj-text">
+        <p>Astor was a project nearly a decade in the making, but the level design team only existed during the final two to three years of production. When we arrived, some levels were being built from scratch: clean slates we could approach with full creative ownership. Others were inherited from earlier production phases and required deep intervention: evaluating what was worth keeping, what no longer aligned with the current design direction, and what needed to be rebuilt entirely. Counterintuitively, the inherited levels were often the harder challenge. Starting from zero meant we could account for every variable upfront. Adapting existing work meant navigating the tension between what was already there and what the game actually needed.</p>
+        <p>Temple of Psyche is a clear example of this. It was one of the first levels I worked on at C2, and when I inherited it, it had significant problems: confusing layout, mismatched metrics, poor player orientation. I rebuilt it into a level that was spatially clear, narratively grounded, and mechanically coherent without discarding what made the space interesting in the first place.</p>
+        <p>Production was organized around milestones of roughly three months. Each milestone, the team I led was responsible for bringing three to four levels to a playable, QA-ready state. Progress was tracked in Jira and version-controlled in Perforce. Internally, I ran weekly or bi-weekly playtesting sessions where the team played each other's work and gave structured feedback. We also held weekly sessions with an external consultancy of experienced developers brought in to provide direction, whose feedback carried significant weight in shaping our decisions.</p>
+        <p>The scope of work on each level was consistent across the team: validating and refining the spatial layout, populating it with encounters, rewards and challenges, placing NPCs, configuring dialogue, implementing quests, and setting up the Nav Orb, a navigation ability that guides the player to their current objective via navmesh. Getting the Nav Orb right was one of the more technically demanding parts of level design on this project, since it had to function correctly regardless of where in the level Astor activated it. Cinematic implementation was also part of our responsibilities: using a custom behaviour tree–based tool, we configured camera placement, character positioning, animations, and dialogue for all of the game's cutscenes. The animation assets were provided by the animation team, but the full cinematic choreography was assembled and implemented by level designers. The final stage of each milestone was an extended testing period: playing through completed levels repeatedly as art passes landed, catching anything that broke in the process.</p>
+        <p>Below is a breakdown of a selection of three of the levels I designed and implemented directly.</p>
+      </div>
+    </div>
+
+    <!-- ── TEMPLE OF CHOSEN ── -->
+    <div class="proj-section" id="sec-chosen">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Temple of Chosen</h2>
+      </div>
+
+      <!-- Context -->
+      <div class="level-context-bar">
+        <span class="level-tag">Opening Level</span>
+        <span class="level-tag">Tutorial</span>
+        <span class="level-tag">Narrative Setup</span>
+      </div>
+
+      <div class="two-col text-first" style="margin-top:24px;">
+        <div class="proj-text">
+          <p>Temple of Chosen is the game's opening level, short and direct by design. It opens with a cinematic introducing Astor and his companion Zan exploring ancient ruins together, setting a tone of mystery and discovery. When the level begins, Astor has no abilities. The design goal was to give the player the full core power set and teach them how to use it before the level ends.</p>
+          <p>The level is openly tutorial in nature, and that was a deliberate choice. The real design challenge was calibrating the right amount of gameplay: enough to introduce the mechanics properly, but tight enough that the level never overstays its welcome. Finding that balance took multiple iterations to get right.</p>
+        </div>
+        <div>
+          <div class="slider" id="slider-chosen">
+            <div class="slider-track" id="track-chosen">
+              <div class="slider-slide"><img src="img/Astor/Chosen/01.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Temple of Chosen"></div>
+              <div class="slider-slide"><img src="img/Astor/Chosen/02.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Temple of Chosen"></div>
+              <div class="slider-slide"><img src="img/Astor/Chosen/03.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Temple of Chosen"></div>
+              <div class="slider-slide"><img src="img/Astor/Chosen/04.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Temple of Chosen"></div>
+              <div class="slider-slide"><img src="img/Astor/Chosen/05.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Temple of Chosen"></div>
+              <div class="slider-slide"><img src="img/Astor/Chosen/06.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Temple of Chosen"></div>
+            </div>
+            <button class="slider-btn prev" onclick="moveSlider('chosen',-1)">‹</button>
+            <button class="slider-btn next" onclick="moveSlider('chosen',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-chosen">
+            <div class="slider-dot active" onclick="goSlide('chosen',0)"></div>
+            <div class="slider-dot" onclick="goSlide('chosen',1)"></div>
+            <div class="slider-dot" onclick="goSlide('chosen',2)"></div>
+            <div class="slider-dot" onclick="goSlide('chosen',3)"></div>
+            <div class="slider-dot" onclick="goSlide('chosen',4)"></div>
+            <div class="slider-dot" onclick="goSlide('chosen',5)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video -->
+      <div style="margin-top:32px;">
+        <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;">
+          <iframe src="https://www.youtube.com/embed/eogkdlBi29Q?rel=0&modestbranding=1&controls=1"
+            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
+            style="width:100%;height:100%;position:absolute;inset:0;"></iframe>
+        </div>
+        <p class="img-caption">Full walkthrough — Temple of Chosen</p>
+      </div>
+    </div>
+
+    <div style="display:none;" id="neuma-hidden">
+    <!-- ── TEMPLE OF NEUMA ── -->
+    <div class="proj-section" id="sec-neuma">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Temple of Neuma</h2>
+      </div>
+
+      <div class="level-context-bar">
+        <span class="level-tag">Act I Climax</span>
+        <span class="level-tag">Three-faction Encounter</span>
+        <span class="level-tag">Collapse Sequence</span>
+      </div>
+
+      <div class="proj-text" style="margin-top:24px;margin-bottom:24px;">
+        <p>Temple of Neuma marks the close of the first act, and it's one of the most narratively dense levels in the game. Astor and his companions infiltrate the lost temple before their enemies, racing to reach a power that could help them face Haken. Midway through, the Hiltsik forces, Haken's army, breach the temple and begin fighting the Ancient defenders that were already blocking Astor's path. The level becomes a three-faction battlefield simultaneously collapsing around the player, culminating in a final sprint toward the relic before the temple falls entirely.</p>
+        <p>The design challenge was making that chaos feel exciting rather than disorienting. The player needed a clear sense of where they were going and why, even as the environment and the encounter logic escalated around them. At the same time, the level had to carry the full weight of its narrative payoff: the closing cinematic where Haken appears for the first time and demonstrates his power by taking the life of one of Astor's closest allies. Everything in the level builds toward that moment.</p>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="slider" id="slider-neuma">
+            <div class="slider-track" id="track-neuma">
+              <div class="slider-slide"><div class="img-block">Neuma — Screenshot 1</div></div>
+              <div class="slider-slide"><div class="img-block">Neuma — Screenshot 2</div></div>
+              <div class="slider-slide"><div class="img-block">Neuma — Screenshot 3</div></div>
+              <div class="slider-slide"><div class="img-block">Neuma — Collapse sequence</div></div>
+            </div>
+            <button class="slider-btn prev" onclick="moveSlider('neuma',-1)">‹</button>
+            <button class="slider-btn next" onclick="moveSlider('neuma',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-neuma">
+            <div class="slider-dot active" onclick="goSlide('neuma',0)"></div>
+            <div class="slider-dot" onclick="goSlide('neuma',1)"></div>
+            <div class="slider-dot" onclick="goSlide('neuma',2)"></div>
+            <div class="slider-dot" onclick="goSlide('neuma',3)"></div>
+          </div>
+        </div>
+        <div>
+          <div class="slider" id="slider-neuma2">
+            <div class="slider-track" id="track-neuma2">
+              <div class="slider-slide"><div class="img-block">Neuma — Hiltsik breach</div></div>
+              <div class="slider-slide"><div class="img-block">Neuma — Three-faction combat</div></div>
+              <div class="slider-slide"><div class="img-block">Neuma — Final sprint</div></div>
+            </div>
+            <button class="slider-btn prev" onclick="moveSlider('neuma2',-1)">‹</button>
+            <button class="slider-btn next" onclick="moveSlider('neuma2',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-neuma2">
+            <div class="slider-dot active" onclick="goSlide('neuma2',0)"></div>
+            <div class="slider-dot" onclick="goSlide('neuma2',1)"></div>
+            <div class="slider-dot" onclick="goSlide('neuma2',2)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:32px;">
+        <div class="img-block wide">Neuma — Walkthrough video placeholder</div>
+        <p class="img-caption">Full walkthrough — Temple of Neuma</p>
+      </div>
+    </div>
+
+    </div>
+
+        <!-- ── THE OBSERVATORY ── -->
+    <div class="proj-section" id="sec-observatory">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">The Observatory</h2>
+      </div>
+
+      <div class="level-context-bar">
+        <span class="level-tag">Late Game</span>
+        <span class="level-tag">Vertical Structure</span>
+        <span class="level-tag">Environmental Narrative</span>
+        <span class="level-tag">Ability Showcase</span>
+      </div>
+
+      <div class="proj-text" style="margin-top:24px;margin-bottom:32px;">
+        <p>The Observatory is the most ambitious level in the game. It's an ancient tower stretching from the peak of the world's highest mountain to the stratosphere: a near-infinite vertical structure that Astor ascends floor by floor, discovering what each level holds. The core narrative premise is that this place retroactively explains everything: every biome, every ecosystem the player has traveled through was engineered here. The Observatory is the origin of the world's life, and that revelation recontextualizes every level that came before it.</p>
+        <p>The story is told through environmental holograms. As Astor moves through the tower, scenes from the past replay around him: the relationship between Haken and his creator Soren, who were once master and student. That relationship deteriorates as Astor ascends, the holograms growing darker until the culminating moment: Haken pushing Soren from the summit of the tower he built.</p>
+        <p>Mechanically, the level introduces the Awakening: an uncontrolled power surge that overtakes Astor at specific moments, making him dramatically stronger for a limited time. These bursts are tied directly to narrative beats, so the player's combat capability fluctuates with the emotional weight of what they're uncovering. The boss fight against the Ancient Demon is designed around this state. After defeating it, a badly wounded Astor reaches the top floor alone, where the Observatory's guiding spirit gives him control over his power. Soren's spirit is waiting there to reveal the truth of what happened.</p>
+        <p>The Observatory was also one of the most technically demanding levels to produce. Each floor was its own sub-level, assigned to a different designer and orchestrated by me. The elevator didn't move through space: it loaded and unloaded the corresponding sub-level as Astor progressed, which meant every designer had to coordinate their entry and exit points so the transitions made spatial sense. The logistics were significant. The Nav Orb also caused persistent problems here, since loading and unloading sub-levels repeatedly broke the navmesh in ways that were difficult to predict and required careful iteration to resolve.</p>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="slider" id="slider-obs">
+            <div class="slider-track" id="track-obs">
+              <div class="slider-slide"><img src="img/Astor/Observatory/01.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/02.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/03.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/04.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/05.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/06.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/07.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+            </div>
+            <button class="slider-btn prev" onclick="moveSlider('obs',-1)">‹</button>
+            <button class="slider-btn next" onclick="moveSlider('obs',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-obs">
+            <div class="slider-dot active" onclick="goSlide('obs',0)"></div>
+            <div class="slider-dot" onclick="goSlide('obs',1)"></div>
+            <div class="slider-dot" onclick="goSlide('obs',2)"></div>
+            <div class="slider-dot" onclick="goSlide('obs',3)"></div>
+            <div class="slider-dot" onclick="goSlide('obs',4)"></div>
+            <div class="slider-dot" onclick="goSlide('obs',5)"></div>
+            <div class="slider-dot" onclick="goSlide('obs',6)"></div>
+          </div>
+        </div>
+        <div>
+          <div class="slider" id="slider-obs2">
+            <div class="slider-track" id="track-obs2">
+              <div class="slider-slide"><img src="img/Astor/Observatory/08.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/09.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/10.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/11.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/12.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+              <div class="slider-slide"><img src="img/Astor/Observatory/13.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Observatory"></div>
+            </div>
+            <button class="slider-btn prev" onclick="moveSlider('obs2',-1)">‹</button>
+            <button class="slider-btn next" onclick="moveSlider('obs2',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-obs2">
+            <div class="slider-dot active" onclick="goSlide('obs2',0)"></div>
+            <div class="slider-dot" onclick="goSlide('obs2',1)"></div>
+            <div class="slider-dot" onclick="goSlide('obs2',2)"></div>
+            <div class="slider-dot" onclick="goSlide('obs2',3)"></div>
+            <div class="slider-dot" onclick="goSlide('obs2',4)"></div>
+            <div class="slider-dot" onclick="goSlide('obs2',5)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:32px;">
+        <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;">
+          <iframe src="https://www.youtube.com/embed/upEt0tncGtA?rel=0&modestbranding=1&controls=1"
+            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
+            style="width:100%;height:100%;position:absolute;inset:0;"></iframe>
+        </div>
+        <p class="img-caption">Full walkthrough — The Observatory</p>
+      </div>
+    </div>
+
+    <!-- ── THE MONOLITH ── -->
+    <div class="proj-section" id="sec-monolith">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">The Monolith</h2>
+      </div>
+
+      <div class="level-context-bar">
+        <span class="level-tag">Final Level</span>
+        <span class="level-tag">Chase Sequence</span>
+        <span class="level-tag">Narrative Climax</span>
+      </div>
+
+      <div class="proj-text" style="margin-top:24px;margin-bottom:32px;">
+        <p>The Monolith is the game's final level, and the Monolith itself is its organizing principle. The source of all power on the planet, it had to feel like a destination worthy of everything that came before it. The level was designed around it from the start: as Astor races through the canyon, the rock formations on either side are placed deliberately to reveal the Monolith in stages. It appears first at a distance, barely visible between the ridges. As the player advances it grows, the canyon walls gradually opening up until Astor is standing directly beneath it and its full scale is impossible to ignore. That reveal was the central design decision around which everything else was built.</p>
+        <p>The level is a frenetic chase: Haken pressing toward his goal while his best soldiers throw themselves at Astor to slow him down, forcing the player to fight through wave after wave of enemies while keeping pace. It's short and deliberately so. After everything the player has been through, the pacing here needed to feel like a sprint to the finish. The design goal was sustained intensity with no room to breathe, all the way to the Monolith's door.</p>
+        <p>Astor arrives too late. Haken enters the Monolith first and the door seals behind him, leaving Astor outside with no way in. It's a moment of genuine defeat after a full game of fighting. What follows is one of the level's most important beats: the Diokek, all of Astor's companions, arrive and perform a runic ritual together that forces the Monolith open one more time. It gives Astor a last farewell to everyone he's traveled with before stepping inside for the final confrontation with Haken.</p>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="slider" id="slider-monolith">
+            <div class="slider-track" id="track-monolith">
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/A/01.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/A/02.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/A/03.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/A/04.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+            </div>
+            <button class="slider-btn prev" onclick="moveSlider('monolith',-1)">‹</button>
+            <button class="slider-btn next" onclick="moveSlider('monolith',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-monolith">
+            <div class="slider-dot active" onclick="goSlide('monolith',0)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith',1)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith',2)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith',3)"></div>
+          </div>
+        </div>
+        <div>
+          <div class="slider" id="slider-monolith2">
+            <div class="slider-track" id="track-monolith2">
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/B/01.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/B/02.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/B/03.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/B/04.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/B/05.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/B/06.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/B/07.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/B/08.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+              <div class="slider-slide"><img src="img/Astor/TheMonolith/B/09.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="The Monolith"></div>
+            </div>
+            <button class="slider-btn prev" onclick="moveSlider('monolith2',-1)">‹</button>
+            <button class="slider-btn next" onclick="moveSlider('monolith2',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-monolith2">
+            <div class="slider-dot active" onclick="goSlide('monolith2',0)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith2',1)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith2',2)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith2',3)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith2',4)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith2',5)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith2',6)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith2',7)"></div>
+            <div class="slider-dot" onclick="goSlide('monolith2',8)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:32px;">
+        <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;">
+          <iframe src="https://www.youtube.com/embed/xtaYKzc1zho?rel=0&modestbranding=1&controls=1"
+            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
+            style="width:100%;height:100%;position:absolute;inset:0;"></iframe>
+        </div>
+        <p class="img-caption">Full walkthrough — The Monolith</p>
+      </div>
+    </div>
+
+    <!-- ── SUPERVISED LEVELS ── -->
+    <div class="proj-section" id="sec-supervised">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Additional Levels</h2>
+      </div>
+
+      <div class="level-context-bar">
+        <span class="level-tag">Direction & Mentorship</span>
+        <span class="level-tag">Design Review</span>
+        <span class="level-tag">Full Game Scope</span>
+      </div>
+
+      <div class="proj-text" style="margin-top:24px;margin-bottom:28px;">
+        <p>Beyond the three levels detailed above, Astor shipped with 20+ levels total. Several of these were designed and built in collaboration with other designers on the team, with me directing, mentoring, and reviewing the work throughout the production cycle, providing feedback on player flow, encounter pacing, and spatial composition.</p>
+        <p>A selection of shots from those levels is shown below as a sense of the full scope and visual variety of the game.</p>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-item"><img src="img/Astor/Additional/01.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Additional Level"></div>
+        <div class="gallery-item"><img src="img/Astor/Additional/02.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Additional Level"></div>
+        <div class="gallery-item"><img src="img/Astor/Additional/03.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Additional Level"></div>
+        <div class="gallery-item"><img src="img/Astor/Additional/04.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Additional Level"></div>
+        <div class="gallery-item"><img src="img/Astor/Additional/05.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Additional Level"></div>
+        <div class="gallery-item"><img src="img/Astor/Additional/06.jpg" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" alt="Additional Level"></div>
+      </div>
+    </div>
+
+    <!-- ── FINAL THOUGHTS ── -->
+    <div class="proj-section" id="sec-final">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Final Thoughts</h2>
+      </div>
+      <div class="proj-text">
+        <p>Shipping Astor: Blade of the Monolith was one of the most meaningful moments of my career. Seeing the game available on PC, PS4, PS5, Xbox Series X|S, and Nintendo Switch, platforms I'd grown up playing, made it real in a way that's hard to put into words. It was my first professional release, and I don't think anything quite prepares you for what it feels like to see something you built actually exist in the world.</p>
+        <p>What made it even more significant was the trust C2 placed in me. I had been working with the studio for only a couple of months when they gave me the Lead Level Designer role. That confidence shaped how I approached the project from day one. I wanted to earn it. Leading the team, coordinating with art and engineering, navigating the friction that comes naturally when disciplines intersect under pressure: all of it was demanding, and all of it made me a better designer and a better collaborator.</p>
+        <p>Astor was not a simple project. Nearly a decade of development history, a team finding its footing, and the constant challenge of aligning creative vision with technical reality. But that complexity is also what made working on it so formative. I'm deeply grateful to everyone at C2 who was part of it. This is a project I'll always carry with me.</p>
+      </div>
+    </div>
+
+    <!-- ── CTA ── -->
+    <div class="proj-section revealed" style="text-align:center;padding:40px 0;">
+      <p class="proj-text" style="margin-bottom:24px;text-align:center;">Astor: Blade of the Monolith is available now on PC, PS5, Xbox Series X|S and Nintendo Switch.</p>
+      <a href="https://store.steampowered.com/app/1989320/Astor_Blade_of_the_Monolith/" target="_blank"
+        style="display:inline-block;background:var(--indigo);color:white;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">
+        Play Now on Steam
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    <span class="footer-copy">© 2025 Mateo Mancera Camacho</span>
+    <span class="footer-name">Lead Level Designer</span>
+  </footer>
+</div>
+
+<script>
+function goHome() { window.location.href = 'portfolio.html'; }
+
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Slider logic ──────────────────────────────────────────────────────────────
+const sliders = {};
+
+function getSlider(id) {
+  if (!sliders[id]) {
+    sliders[id] = { current: 0 };
+    const track = document.getElementById('track-' + id);
+    sliders[id].total = track ? track.children.length : 0;
+  }
+  return sliders[id];
+}
+
+function moveSlider(id, dir) {
+  const s = getSlider(id);
+  s.current = (s.current + dir + s.total) % s.total;
+  updateSlider(id);
+}
+
+function goSlide(id, idx) {
+  const s = getSlider(id);
+  s.current = idx;
+  updateSlider(id);
+}
+
+function updateSlider(id) {
+  const s = getSlider(id);
+  const track = document.getElementById('track-' + id);
+  if (track) track.style.transform = `translateX(-${s.current * 100}%)`;
+  const dots = document.querySelectorAll(`#dots-${id} .slider-dot`);
+  dots.forEach((d, i) => d.classList.toggle('active', i === s.current));
+}
+
+// ── Scroll observer ───────────────────────────────────────────────────────────
+function initObserver() {
+  const sections = document.querySelectorAll('.proj-section');
+  const skipLinks = document.querySelectorAll('#skipLinks a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        const id = entry.target.id;
+        if (id) {
+          skipLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+        }
+      }
+    });
+  }, { threshold: 0.08 });
+  sections.forEach(s => obs.observe(s));
+}
+
+document.addEventListener('DOMContentLoaded', initObserver);
+
+// ── Lightbox ──────────────────────────────────────────────────────────────────
+let _lbImages = [], _lbIndex = 0;
+
+function openLightbox(images, index) {
+  _lbImages = images;
+  _lbIndex = index;
+  updateLightbox();
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function updateLightbox() {
+  const img = document.getElementById('lightbox-img');
+  img.style.opacity = '0';
+  setTimeout(() => {
+    img.src = _lbImages[_lbIndex];
+    img.style.opacity = '1';
+  }, 100);
+  const counter = document.getElementById('lightbox-counter');
+  counter.textContent = _lbImages.length > 1 ? `${_lbIndex + 1} / ${_lbImages.length}` : '';
+  document.querySelector('.lightbox-btn.prev').style.display = _lbImages.length > 1 ? 'flex' : 'none';
+  document.querySelector('.lightbox-btn.next').style.display = _lbImages.length > 1 ? 'flex' : 'none';
+}
+
+function lightboxNav(dir) {
+  _lbIndex = (_lbIndex + dir + _lbImages.length) % _lbImages.length;
+  updateLightbox();
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+  _lbImages = [];
+}
+
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight') lightboxNav(1);
+  if (e.key === 'ArrowLeft') lightboxNav(-1);
+});
+
+function attachLightbox() {
+  // Sliders: navigate within same slider
+  document.querySelectorAll('.slider').forEach(slider => {
+    const imgs = Array.from(slider.querySelectorAll('.slider-slide img'));
+    if (!imgs.length) return;
+    imgs.forEach((img, i) => {
+      img.style.cursor = 'zoom-in';
+      img.onclick = function(e) {
+        e.stopPropagation();
+        openLightbox(imgs.map(x => x.src), i);
+      };
+    });
+  });
+  // Gallery grids: navigate within same grid
+  document.querySelectorAll('.gallery-grid').forEach(grid => {
+    const imgs = Array.from(grid.querySelectorAll('img'));
+    if (!imgs.length) return;
+    imgs.forEach((img, i) => {
+      img.style.cursor = 'zoom-in';
+      img.onclick = function(e) {
+        e.stopPropagation();
+        openLightbox(imgs.map(x => x.src), i);
+      };
+    });
+  });
+  // Standalone images (not inside slider or gallery-grid): open solo
+  document.querySelectorAll('.proj-section img, .project-body > img').forEach(img => {
+    if (img.closest('.slider') || img.closest('.gallery-grid')) return;
+    if (img.dataset.lbAttached) return;
+    img.dataset.lbAttached = '1';
+    img.style.cursor = 'zoom-in';
+    img.onclick = function(e) {
+      e.stopPropagation();
+      openLightbox([img.src], 0);
+    };
+  });
+}
+
+document.addEventListener('DOMContentLoaded', attachLightbox);
+</script>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+  <button class="lightbox-btn prev" onclick="event.stopPropagation();lightboxNav(-1)">‹</button>
+  <img id="lightbox-img" src="" alt="" onclick="event.stopPropagation()">
+  <button class="lightbox-btn next" onclick="event.stopPropagation();lightboxNav(1)">›</button>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
+</body>
+</html>

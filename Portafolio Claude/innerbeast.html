@@ -1,0 +1,2259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inner Beast — Mateo Mancera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
+<style>
+/* ─── RESET & BASE ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #0B0B0F;
+  --bg-surface: #111118;
+  --bg-card:    #15151E;
+  --bg-hover:   #1C1C28;
+  --indigo:     #6C63FF;
+  --indigo-dim: #2E2A6A;
+  --indigo-glow:rgba(108,99,255,0.15);
+  --coral:      #FF6B6B;
+  --off-white:  #EEEAF8;
+  --muted:      #7A7A9A;
+  --border:     #1E1E2E;
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--off-white);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ─── NOISE OVERLAY ─────────────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--indigo-dim); border-radius: 2px; }
+
+/* ─── TYPOGRAPHY ────────────────────────────────────────────────────────────── */
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; }
+
+/* ─── NAVIGATION ────────────────────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  background: rgba(11,11,15,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.3s;
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--off-white);
+  text-decoration: none;
+  letter-spacing: -0.03em;
+  cursor: pointer;
+}
+.nav-logo span { color: var(--indigo); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+.nav-links a:hover { color: var(--off-white); }
+
+.nav-cta {
+  background: var(--indigo);
+  color: var(--off-white) !important;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background 0.2s, transform 0.15s !important;
+}
+.nav-cta:hover {
+  background: #7B73FF !important;
+  transform: translateY(-1px);
+  color: var(--off-white) !important;
+}
+
+/* ─── PAGES ─────────────────────────────────────────────────────────────────── */
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+/* ─── HOMEPAGE ──────────────────────────────────────────────────────────────── */
+
+/* Hero */
+.hero {
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  padding: 120px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Video background */
+.hero-video-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.hero-video-bg video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 177.78vh;
+  height: 100vh;
+  min-width: 100%;
+  min-height: 56.25vw;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.hero-video-bg video.loaded {
+  opacity: 1;
+}
+.hero-video-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(11,11,15,0.88) 0%,
+    rgba(11,11,15,0.72) 50%,
+    rgba(11,11,15,0.85) 100%
+  );
+  z-index: 1;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Avatar */
+.hero-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--indigo);
+  overflow: hidden;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0s forwards;
+  box-shadow: 0 0 0 4px rgba(108,99,255,0.15);
+}
+.hero-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.hero-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+  top: -100px; right: -100px;
+  pointer-events: none;
+}
+.hero-glow-2 {
+  position: absolute;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(255,107,107,0.06) 0%, transparent 70%);
+  bottom: 0; left: 20%;
+  pointer-events: none;
+}
+
+.hero-content { max-width: 680px; }
+
+.hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--indigo);
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.1s forwards;
+}
+.hero-label::before {
+  content: '';
+  display: block;
+  width: 24px; height: 1px;
+  background: var(--indigo);
+}
+
+.hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 7vw, 88px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--off-white);
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.2s forwards;
+}
+.hero-name .accent { color: var(--indigo); }
+
+.hero-role {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--muted);
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.3s forwards;
+}
+.hero-role strong { color: var(--off-white); font-weight: 500; }
+
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.4s forwards;
+}
+
+.tag {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--bg-surface);
+}
+.tag.highlight {
+  border-color: var(--indigo-dim);
+  color: var(--indigo);
+  background: rgba(108,99,255,0.08);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.5s forwards;
+}
+
+.btn-primary {
+  background: var(--indigo);
+  color: var(--off-white);
+  border: none;
+  padding: 13px 28px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-primary:hover { background: #7B73FF; transform: translateY(-2px); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 13px 28px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, transform 0.15s;
+}
+.btn-secondary:hover {
+  color: var(--off-white);
+  border-color: var(--muted);
+  transform: translateY(-2px);
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  gap: 0;
+  margin: 0 48px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.6s forwards;
+}
+.stat {
+  flex: 1;
+  padding: 24px 32px;
+  border-right: 1px solid var(--border);
+}
+.stat:last-child { border-right: none; }
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--off-white);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.stat-num span { color: var(--indigo); }
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Work section */
+.section {
+  padding: 80px 48px;
+}
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.section-title-large {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--off-white);
+  margin-bottom: 48px;
+}
+
+/* Project cards */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+  position: relative;
+}
+.project-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--indigo-dim);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px var(--indigo-dim);
+}
+
+.project-card-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.project-card-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(21,21,30,0.8) 100%);
+}
+.project-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-card-body {
+  padding: 20px;
+}
+.project-card-studio {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.project-card-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--off-white);
+  margin-bottom: 6px;
+}
+.project-card-role {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.project-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-weight: 500;
+}
+.badge-published {
+  background: rgba(108,99,255,0.15);
+  color: var(--indigo);
+  border: 1px solid var(--indigo-dim);
+}
+.badge-wip {
+  background: rgba(255,107,107,0.1);
+  color: var(--coral);
+  border: 1px solid rgba(255,107,107,0.2);
+}
+.badge-placeholder {
+  background: var(--bg-hover);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.card-arrow {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 14px;
+  transition: background 0.2s, color 0.2s;
+}
+.project-card:hover .card-arrow {
+  background: var(--indigo);
+  color: white;
+}
+
+/* ─── PROJECT PAGE ──────────────────────────────────────────────────────────── */
+#project-page {
+  padding-top: 64px;
+}
+
+/* Project Hero */
+.project-hero {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 0;
+  max-height: 60vh;
+  border-bottom: 1px solid var(--border);
+}
+
+.project-hero-media {
+  background: var(--bg-surface);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.project-hero-media .yt-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.yt-play {
+  width: 64px; height: 64px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.project-hero-meta {
+  padding: 48px 40px;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.project-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: color 0.2s;
+}
+.project-back:hover { color: var(--off-white); }
+
+.project-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--off-white);
+  margin-bottom: 24px;
+}
+
+.meta-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.meta-key {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  min-width: 64px;
+}
+.meta-val {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--off-white);
+}
+
+.btn-download {
+  margin-top: auto;
+  background: var(--indigo);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
+}
+.btn-download:hover { background: #7B73FF; }
+
+/* Skip To widget */
+.skip-widget {
+  position: fixed;
+  bottom: 32px;
+  left: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  width: 180px;
+  z-index: 90;
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.skip-widget.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.skip-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.skip-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+}
+.skip-links a {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 3px 6px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+  display: block;
+}
+.skip-links a:hover { color: var(--off-white); background: var(--bg-hover); }
+.skip-links a.active { color: var(--indigo); background: rgba(108,99,255,0.1); }
+
+/* Project sections */
+.project-body {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 64px 48px;
+}
+
+.proj-section {
+  margin-bottom: 48px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  scroll-margin-top: 80px;
+}
+.proj-section.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.proj-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.proj-section-bar {
+  width: 3px;
+  height: 22px;
+  background: var(--indigo);
+  border-radius: 2px;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+.proj-section-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--off-white);
+}
+
+/* Two-column layout */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.two-col.text-first { grid-template-columns: 1.2fr 1fr; }
+.two-col.img-first { grid-template-columns: 1fr 1.2fr; }
+
+.proj-text {
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(238,234,248,0.75);
+}
+.proj-text p + p { margin-top: 12px; }
+
+/* Image placeholders */
+.img-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  aspect-ratio: 16/9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  position: relative;
+}
+.img-block img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.img-block.tall { aspect-ratio: 4/3; }
+.img-block.wide { aspect-ratio: 21/9; }
+
+/* Image caption */
+.img-caption {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Pillars grid */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.pillar-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.25s;
+}
+.pillar-card:hover { border-color: var(--indigo-dim); }
+.pillar-img {
+  aspect-ratio: 16/9;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 11px;
+}
+.pillar-body { padding: 14px 16px; }
+.pillar-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--off-white);
+  margin-bottom: 6px;
+}
+.pillar-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Image slider */
+.slider {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.slider-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.slider-slide {
+  min-width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(11,11,15,0.75);
+  border: 1px solid var(--border);
+  color: var(--off-white);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+  font-size: 16px;
+  z-index: 2;
+}
+.slider-btn:hover { background: var(--indigo); }
+.slider-btn.prev { left: 12px; }
+.slider-btn.next { right: 12px; }
+.slider-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+.slider-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.slider-dot.active { background: var(--indigo); transform: scale(1.3); }
+
+/* Areas grid */
+.areas-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.area-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.area-card:hover { border-color: var(--indigo-dim); }
+.area-slider { position: relative; }
+.area-img {
+  aspect-ratio: 16/9;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 11px;
+}
+.area-body { padding: 14px 16px; }
+.area-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--off-white);
+  margin-bottom: 5px;
+}
+.area-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+/* Flowchart */
+.flowchart {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+}
+.flowchart-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 24px;
+}
+.flow-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.flow-node {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  flex: 1;
+  max-width: 140px;
+}
+.flow-node-img {
+  aspect-ratio: 16/9;
+  background: var(--bg-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--muted);
+}
+.flow-node-label {
+  padding: 6px 8px;
+  font-size: 9px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.3;
+}
+.flow-arrow {
+  color: var(--indigo);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.flow-connector {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  margin: 0 auto;
+}
+
+/* Gameplay highlights */
+.gameplay-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.gameplay-item {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.gameplay-video {
+  aspect-ratio: 16/9;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.gameplay-yt-btn {
+  width: 48px; height: 48px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.gameplay-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--off-white);
+  margin-bottom: 10px;
+}
+.gameplay-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* Process stages */
+.process-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.process-stage {}
+.process-stage-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--off-white);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.process-stage-title::before {
+  content: '';
+  display: block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--indigo);
+  flex-shrink: 0;
+}
+
+/* Techniques */
+.techniques-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.technique {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.technique-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--off-white);
+  margin-bottom: 8px;
+}
+.technique-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.technique-bullets li {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  padding-left: 16px;
+  position: relative;
+}
+.technique-bullets li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--indigo);
+  font-size: 11px;
+}
+
+/* Walkthrough */
+.walkthrough-video {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.walkthrough-play {
+  width: 72px; height: 72px;
+  background: var(--indigo);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+.walkthrough-play:hover { transform: scale(1.05); background: #7B73FF; }
+
+/* Gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.gallery-item {
+  aspect-ratio: 16/9;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.gallery-item:hover {
+  transform: scale(1.02);
+  border-color: var(--indigo-dim);
+}
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+
+/* ─── ABOUT PAGE ────────────────────────────────────────────────────────────── */
+.about-content {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 100px 48px;
+}
+.about-label {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--indigo);
+  margin-bottom: 16px;
+}
+.about-title {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--off-white);
+  line-height: 1.05;
+  margin-bottom: 32px;
+}
+.about-body {
+  font-size: 15px;
+  color: rgba(238,234,248,0.7);
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+/* ─── CONTACT PAGE ──────────────────────────────────────────────────────────── */
+.contact-content {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 100px 48px;
+  text-align: center;
+}
+.contact-title {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 16px;
+}
+.contact-sub {
+  color: var(--muted);
+  font-size: 15px;
+  margin-bottom: 40px;
+}
+.contact-email {
+  display: inline-block;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--indigo);
+  text-decoration: none;
+  border-bottom: 1px solid var(--indigo-dim);
+  padding-bottom: 4px;
+  transition: border-color 0.2s;
+}
+.contact-email:hover { border-color: var(--indigo); }
+
+/* ─── FOOTER ────────────────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-copy {
+  font-size: 12px;
+  color: var(--muted);
+}
+.footer-name {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--off-white);
+}
+
+/* ─── LIGHTBOX ──────────────────────────────────────────────────────────────── */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+.lightbox.active { display: flex; }
+.lightbox img {
+  max-width: 85vw;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+  cursor: default;
+  transition: opacity 0.15s ease;
+}
+.lightbox-close {
+  position: absolute;
+  top: 20px; right: 28px;
+  color: var(--muted);
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+  z-index: 2;
+}
+.lightbox-close:hover { color: var(--off-white); }
+.lightbox-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--off-white);
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 22px;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+  z-index: 2;
+}
+.lightbox-btn:hover { background: var(--indigo); }
+.lightbox-btn.prev { left: 24px; }
+.lightbox-btn.next { right: 24px; }
+.lightbox-counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--font-body);
+}
+
+/* Make slider images show pointer cursor */
+.slider-slide img { cursor: zoom-in; }
+
+/* ─── ANIMATIONS ────────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  nav { padding: 0 24px; }
+  .hero { padding: 100px 24px 60px; }
+  .stats-bar { margin: 0 24px; flex-wrap: wrap; }
+  .stat { min-width: 50%; }
+  .section { padding: 60px 24px; }
+  .projects-grid { grid-template-columns: 1fr; }
+  .project-hero { grid-template-columns: 1fr; }
+  .project-hero-media { min-height: 240px; }
+  .project-hero-meta { border-left: none; border-top: 1px solid var(--border); }
+  .project-body { padding: 40px 24px; }
+  .two-col, .two-col.text-first, .two-col.img-first { grid-template-columns: 1fr; }
+  .pillars-grid { grid-template-columns: 1fr; }
+  .areas-grid { grid-template-columns: 1fr; }
+  .gameplay-item { grid-template-columns: 1fr; }
+  .technique { grid-template-columns: 1fr; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .skip-widget { display: none; }
+  footer { flex-direction: column; gap: 8px; text-align: center; }
+}
+
+@media (max-width: 600px) {
+  .nav-links { gap: 16px; }
+  .hero-name { font-size: 42px; }
+  .stats-bar { flex-direction: column; }
+  .stat { border-right: none; border-bottom: 1px solid var(--border); }
+  .stat:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" onclick="window.location.href='portfolio.html'">M<span>M</span></a>
+  <ul class="nav-links">
+    <li><a href="portfolio.html">What I've Done</a></li>
+    <li><a href="portfolio.html#about">About</a></li>
+    <li><a href="Mateo_Mancera_CV.pdf" download="Mateo_Mancera_CV.pdf">Resume</a></li>
+    <li><a class="nav-cta" href="portfolio.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div id="project-page">
+
+  <!-- Skip To widget -->
+  <div class="skip-widget" id="skipWidget">
+    <div class="skip-title">Skip To</div>
+    <ul class="skip-links" id="skipLinks">
+      <li><a href="#sec-overview" onclick="scrollTo('sec-overview')">Level Overview</a></li>
+      <li><a href="#sec-pillars" onclick="scrollTo('sec-pillars')">Level Pillars</a></li>
+      <li><a href="#sec-evolution" onclick="scrollTo('sec-evolution')">Level Evolution</a></li>
+      <li><a href="#sec-areas" onclick="scrollTo('sec-areas')">Level Areas</a></li>
+      <li><a href="#sec-gameplay" onclick="scrollTo('sec-gameplay')">Gameplay Highlights</a></li>
+      <li><a href="#sec-process" onclick="scrollTo('sec-process')">Creative Process</a></li>
+      <li><a href="#sec-walkthrough" onclick="scrollTo('sec-walkthrough')">Walkthrough</a></li>
+      <li><a href="#sec-gallery" onclick="scrollTo('sec-gallery')">Gallery</a></li>
+    </ul>
+  </div>
+
+  <!-- Project Hero -->
+  <div class="project-hero">
+    <div class="project-hero-media">
+      <video id="project-hero-video" muted playsinline style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1s ease;"></video>
+    </div>
+    <div class="project-hero-meta">
+      <div class="project-back" onclick="window.location.href='portfolio.html'">← Back to all projects</div>
+      <h1 class="project-title">Inner Beast</h1>
+      <div class="meta-table">
+        <div class="meta-row">
+          <span class="meta-key">Genre</span>
+          <span class="meta-val">3D Action Adventure</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Type</span>
+          <span class="meta-val">Blockout</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Engine</span>
+          <span class="meta-val">Unreal Engine 5</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Tools</span>
+          <span class="meta-val">Unreal GASP · Max Pears' Level Design Kit</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Role</span>
+          <span class="meta-val">Level Designer</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Stats</span>
+          <span class="meta-val">8 iterations · 6 playtests</span>
+        </div>
+      </div>
+      <a href="#" class="btn-download" style="text-decoration:none;text-align:center;">Play Now</a>
+    </div>
+  </div>
+
+  <!-- Project Body -->
+  <div class="project-body">
+
+    <!-- Level Overview -->
+    <div class="proj-section" id="sec-overview" data-section="Level Overview">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Level Overview</h2>
+      </div>
+      <div class="two-col text-first">
+        <div class="proj-text">
+          <p>Inner Beast is a linear stealth level set in a post-apocalyptic natural reserve, a world where nature has reclaimed every street and building since a catastrophic event unleashed paranormal phenomena across the land.</p>
+          <p>The level is designed as an experience that escalates in tension across nine beats, from a slow introduction where the player learns movement and social stealth, through a parkour crossing over a collapsed bridge, into the reserve where a giant wolf spirit is first encountered, and finally to a climactic confrontation inside a nature-consumed research station.</p>
+          <p>The core design challenge was building a believable escalation of dread using only a blockout, no art assets, no lighting polish, relying entirely on spatial composition, enemy patrol logic, environmental puzzle placement and pacing to communicate tone and tension.</p>
+        </div>
+        <div>
+          <div class="img-block tall">
+            <img src="img/InnerBeast/flythrough-v1.gif" alt="Inner Beast — Level Flythrough V1">
+          </div>
+          <div class="img-caption">Level flythrough — first pass blockout</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level Pillars -->
+    <div class="proj-section" id="sec-pillars" data-section="Level Pillars">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Level Pillars</h2>
+      </div>
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-img">
+            <video src="videos/InnerBeast/pillars/pillar1.mp4" muted loop playsinline autoplay
+              style="width:100%;height:100%;object-fit:cover;"
+              ></video>
+          </div>
+          <div class="pillar-body">
+            <div class="pillar-title">Interweaved traversal sections optimized for GASP controller</div>
+            <div class="pillar-desc">GASP was chosen deliberately over more feature-rich controllers precisely because of its constraints. Where other controllers offer climbing, ropes, swimming and combat, GASP keeps it to jumping, vaulting, crouching and ledge grabbing, and that limitation became a design tool. Every traversal sequence was built around making those four actions feel purposeful, forcing the design to be interesting through spatial composition rather than mechanical complexity.</div>
+          </div>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-img">
+            <video src="videos/InnerBeast/pillars/pillar2.mp4" muted loop playsinline autoplay
+              style="width:100%;height:100%;object-fit:cover;"
+              ></video>
+          </div>
+          <div class="pillar-body">
+            <div class="pillar-title">Smooth transitions between urban and natural areas</div>
+            <div class="pillar-desc">The level moves the player through three distinct environments: a post-apocalyptic residential shelter, a collapsed bridge, and an overgrown natural reserve, without hard breaks between them. Each transition was designed to feel earned spatially: the urban geometry gradually gives way to eroded surfaces and encroaching vegetation, reinforcing the narrative shift from the familiar into the unknown.</div>
+          </div>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-img">
+            <video src="videos/InnerBeast/pillars/pillar3.mp4" muted loop playsinline autoplay
+              style="width:100%;height:100%;object-fit:cover;"
+              ></video>
+          </div>
+          <div class="pillar-body">
+            <div class="pillar-title">High tension, non-violent stealth encounters</div>
+            <div class="pillar-desc">There are no combat mechanics in Inner Beast. When an enemy detects the player, a simple trigger teleports them to the nearest checkpoint and resets enemy positions. This deliberate simplicity kept the focus entirely on the level design: tension is built through patrol placement, sightlines, cover availability and pacing, not through systems complexity. Every tense moment is earned spatially.</div>
+          </div>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-img">
+            <video src="videos/InnerBeast/pillars/pillar4.mp4" muted loop playsinline autoplay
+              style="width:100%;height:100%;object-fit:cover;"
+              ></video>
+          </div>
+          <div class="pillar-body">
+            <div class="pillar-title">Rewarding physics-based puzzles</div>
+            <div class="pillar-desc">The puzzles follow the same philosophy as the rest of the level: no plugins, no complex scripting. Pushing a crate to reach a ledge, repositioning an object to create cover from a patrol. The reward comes not from solving an elaborate system but from reading the space correctly and using what's already there.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level Evolution -->
+    <div class="proj-section" id="sec-evolution" data-section="Level Evolution">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Level Evolution</h2>
+      </div>
+
+      <h3 style="font-family:var(--font-display);font-size:15px;color:var(--off-white);margin-bottom:16px;">Level Layout Evolution</h3>
+      <div class="slider" id="slider-evolution">
+        <div class="slider-track" id="track-evolution">
+          <div class="slider-slide" data-caption="Initial Sketches"><img src="img/InnerBeast/evolution/layout/01.png" style="width:100%;height:100%;object-fit:contain;"></div>
+          <div class="slider-slide" data-caption="2D Map"><img src="img/InnerBeast/evolution/layout/02.png" style="width:100%;height:100%;object-fit:contain;"></div>
+          <div class="slider-slide" data-caption="Initial Blockout"><img src="img/InnerBeast/evolution/layout/03.png" style="width:100%;height:100%;object-fit:contain;"></div>
+          <div class="slider-slide" data-caption="3rd Iteration"><img src="img/InnerBeast/evolution/layout/04.png" style="width:100%;height:100%;object-fit:contain;"></div>
+          <div class="slider-slide" data-caption="5th Iteration"><img src="img/InnerBeast/evolution/layout/05.png" style="width:100%;height:100%;object-fit:contain;"></div>
+          <div class="slider-slide" data-caption="Final Iteration"><img src="img/InnerBeast/evolution/layout/06.png" style="width:100%;height:100%;object-fit:contain;"></div>
+        </div>
+        <button class="slider-btn prev" onclick="slide('evolution',-1)">‹</button>
+        <button class="slider-btn next" onclick="slide('evolution',1)">›</button>
+      </div>
+      <div class="slider-dots" id="dots-evolution"></div>
+      <div class="img-caption" id="caption-evolution" style="margin-bottom:32px;"></div>
+
+      <h3 style="font-family:var(--font-display);font-size:15px;color:var(--off-white);margin-bottom:16px;">Evolution Highlights</h3>
+      <div class="two-col" style="margin-bottom:0;">
+        <div>
+          <div class="slider" id="slider-highlightsA">
+            <div class="slider-track" id="track-highlightsA">
+              <div class="slider-slide"><img src="img/InnerBeast/evolution/highlights/A/01.png" style="width:100%;height:100%;object-fit:cover;"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/evolution/highlights/A/02.png" style="width:100%;height:100%;object-fit:cover;"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/evolution/highlights/A/03.png" style="width:100%;height:100%;object-fit:cover;"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/evolution/highlights/A/04.png" style="width:100%;height:100%;object-fit:cover;"></div>
+            </div>
+            <button class="slider-btn prev" onclick="slide('highlightsA',-1)">‹</button>
+            <button class="slider-btn next" onclick="slide('highlightsA',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-highlightsA"></div>
+          <div class="img-caption">Evolution of the reserve entrance area across iterations</div>
+        </div>
+        <div>
+          <div class="slider" id="slider-highlightsB">
+            <div class="slider-track" id="track-highlightsB">
+              <div class="slider-slide"><img src="img/InnerBeast/evolution/highlights/B/01.png" style="width:100%;height:100%;object-fit:cover;"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/evolution/highlights/B/02.png" style="width:100%;height:100%;object-fit:cover;"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/evolution/highlights/B/03.png" style="width:100%;height:100%;object-fit:cover;"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/evolution/highlights/B/04.png" style="width:100%;height:100%;object-fit:cover;"></div>
+            </div>
+            <button class="slider-btn prev" onclick="slide('highlightsB',-1)">‹</button>
+            <button class="slider-btn next" onclick="slide('highlightsB',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-highlightsB"></div>
+          <div class="img-caption">Evolution of the wolf den stealth encounters across iterations</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level Areas -->
+    <div class="proj-section" id="sec-areas" data-section="Level Areas">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Level Areas</h2>
+      </div>
+      <div class="img-block wide" style="margin-bottom:24px;cursor:zoom-in;" onclick="openLightbox([this.querySelector('img').src], 0)">
+        <img src="img/InnerBeast/areas/main.jpg" alt="Level Areas Overview" style="width:100%;height:100%;object-fit:cover;">
+      </div>
+      <div class="img-caption" style="margin-bottom:24px;">All areas and their key moments mapped</div>
+      <div class="areas-grid">
+
+        <div class="area-card">
+          <div class="area-slider">
+            <div class="slider" id="slider-area01">
+              <div class="slider-track" id="track-area01">
+                <div class="slider-slide"><img src="img/InnerBeast/areas/01_TheShelter/01.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/01_TheShelter/02.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/01_TheShelter/03.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/01_TheShelter/04.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/01_TheShelter/05.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/01_TheShelter/06.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/01_TheShelter/07.png" style="width:100%;height:100%;object-fit:cover;"></div>
+              </div>
+              <button class="slider-btn prev" onclick="slide('area01',-1)">‹</button>
+              <button class="slider-btn next" onclick="slide('area01',1)">›</button>
+            </div>
+            <div class="slider-dots" id="dots-area01"></div>
+          </div>
+          <div class="area-body">
+            <div class="area-name">The Shelter</div>
+            <div class="area-desc">The level's opening area. An abandoned building repurposed as a community refuge. The player learns movement and social stealth by navigating around guards. Getting caught here simply turns you around, light enough to encourage experimentation before the real tension begins.</div>
+          </div>
+        </div>
+
+        <div class="area-card">
+          <div class="area-slider">
+            <div class="slider" id="slider-area02">
+              <div class="slider-track" id="track-area02">
+                <div class="slider-slide"><img src="img/InnerBeast/areas/02_CollapsedBridge/01.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/02_CollapsedBridge/02.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/02_CollapsedBridge/03.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/02_CollapsedBridge/04.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/02_CollapsedBridge/05.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/02_CollapsedBridge/06.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/02_CollapsedBridge/07.png" style="width:100%;height:100%;object-fit:cover;"></div>
+              </div>
+              <button class="slider-btn prev" onclick="slide('area02',-1)">‹</button>
+              <button class="slider-btn next" onclick="slide('area02',1)">›</button>
+            </div>
+            <div class="slider-dots" id="dots-area02"></div>
+          </div>
+          <div class="area-body">
+            <div class="area-name">Collapsed Bridge</div>
+            <div class="area-desc">The transition between the urban world and the reserve. A parkour-focused section that demands the player apply everything learned in the shelter, while offering the first unobstructed view of the reserve ahead: a deliberate contemplative beat before tension escalates.</div>
+          </div>
+        </div>
+
+        <div class="area-card">
+          <div class="area-slider">
+            <div class="slider" id="slider-area03">
+              <div class="slider-track" id="track-area03">
+                <div class="slider-slide"><img src="img/InnerBeast/areas/03_WolvesDen/01.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/03_WolvesDen/02.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/03_WolvesDen/03.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/03_WolvesDen/04.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/03_WolvesDen/05.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/03_WolvesDen/06.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/03_WolvesDen/07.png" style="width:100%;height:100%;object-fit:cover;"></div>
+              </div>
+              <button class="slider-btn prev" onclick="slide('area03',-1)">‹</button>
+              <button class="slider-btn next" onclick="slide('area03',1)">›</button>
+            </div>
+            <div class="slider-dots" id="dots-area03"></div>
+          </div>
+          <div class="area-body">
+            <div class="area-name">Wolves Den</div>
+            <div class="area-desc">The reserve's interior, where the giant wolf spirit is first encountered. The player must navigate sightlines, use cover and interact with the environment to avoid detection. The point where stealth stops being safe and starts being genuinely threatening.</div>
+          </div>
+        </div>
+
+        <div class="area-card">
+          <div class="area-slider">
+            <div class="slider" id="slider-area04">
+              <div class="slider-track" id="track-area04">
+                <div class="slider-slide"><img src="img/InnerBeast/areas/04_ResearchStation/01.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/04_ResearchStation/02.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/04_ResearchStation/03.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/04_ResearchStation/04.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/04_ResearchStation/05.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/04_ResearchStation/06.png" style="width:100%;height:100%;object-fit:cover;"></div>
+                <div class="slider-slide"><img src="img/InnerBeast/areas/04_ResearchStation/07.png" style="width:100%;height:100%;object-fit:cover;"></div>
+              </div>
+              <button class="slider-btn prev" onclick="slide('area04',-1)">‹</button>
+              <button class="slider-btn next" onclick="slide('area04',1)">›</button>
+            </div>
+            <div class="slider-dots" id="dots-area04"></div>
+          </div>
+          <div class="area-body">
+            <div class="area-name">Research Station</div>
+            <div class="area-desc">The level's final area. The exterior of a nature-consumed research building, featuring physics-based puzzles that gate access to the entrance. The level culminates here with the climactic encounter with the wolf spirit.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Gameplay Highlights -->
+    <div class="proj-section" id="sec-gameplay" data-section="Gameplay Highlights">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Gameplay Highlights</h2>
+      </div>
+      <div class="gameplay-list">
+
+        <div class="gameplay-item">
+          <video src="videos/InnerBeast/gameplayHighlights/finding-clues.mp4" muted loop playsinline autoplay
+            style="border-radius:10px;width:100%;height:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg-card);"></video>
+          <div>
+            <div class="gameplay-title">Finding Clues</div>
+            <div class="gameplay-desc">The player explores the level in search of information about the missing brother, interacting with the environment and NPCs to piece together what happened.</div>
+          </div>
+        </div>
+
+        <div class="gameplay-item">
+          <video src="videos/InnerBeast/gameplayHighlights/sneaking-around.mp4" muted loop playsinline autoplay
+            style="border-radius:10px;width:100%;height:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg-card);"></video>
+          <div>
+            <div class="gameplay-title">Sneaking Around</div>
+            <div class="gameplay-desc">Core stealth gameplay in action: navigating patrol routes, using cover and crouching to stay out of enemies' sightlines without any combat mechanics to fall back on.</div>
+          </div>
+        </div>
+
+        <div class="gameplay-item">
+          <video src="videos/InnerBeast/gameplayHighlights/finding-treasures.mp4" muted loop playsinline autoplay
+            style="border-radius:10px;width:100%;height:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg-card);"></video>
+          <div>
+            <div class="gameplay-title">Finding Treasures</div>
+            <div class="gameplay-desc">Optional exploration that rewards the curious player: hidden narrative pickups and collectibles scattered across the reserve that deepen the world without blocking progress.</div>
+          </div>
+        </div>
+
+        <div class="gameplay-item">
+          <video src="videos/InnerBeast/gameplayHighlights/solving-puzzles.mp4" muted loop playsinline autoplay
+            style="border-radius:10px;width:100%;height:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg-card);"></video>
+          <div>
+            <div class="gameplay-title">Solving Environmental Puzzles</div>
+            <div class="gameplay-desc">Physics-based interactions using only what's already in the level: pushing crates, repositioning objects, designed to feel intuitive and rewarding without relying on complex scripting.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Creative Process -->
+    <div class="proj-section" id="sec-process" data-section="Creative Process">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">The Creative Process</h2>
+      </div>
+
+      <!-- Research & Ideation -->
+      <div class="process-stages">
+        <div class="process-stage">
+          <div class="process-stage-title">Research and ideation</div>
+
+          <!-- Game References -->
+          <div style="margin-bottom:32px;">
+            <h4 style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--indigo);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px;">Game References</h4>
+            <div class="proj-text" style="margin-bottom:16px;">
+              <p>The research phase started with three game levels analyzed in detail: <em>The Last of Us Part II</em> (Birthday Gift), <em>Final Fantasy XV</em> (Friends of a Feather), and <em>What Remains of Edith Finch</em> (Introduction). Each was studied for lighting, layout, tone and adaptation potential, not to replicate them, but to extract specific techniques worth borrowing.</p>
+              <p>Three key lessons shaped Inner Beast's design direction: the power of dramatic lighting shifts to change emotional register within a single level; the value of framing and composition as navigation tools; and the impact of claustrophobic layouts when sneaking around a large, threatening enemy.</p>
+            </div>
+            <div class="slider" id="gameRefs-slider"></div>
+          </div>
+
+          <!-- Real-world Photography -->
+          <div style="margin-bottom:32px;">
+            <h4 style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--indigo);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px;">Real-world Photography</h4>
+            <div class="proj-text" style="margin-bottom:16px;">
+              <p>These photographs were taken a few steps from where I lived at the time: the daily walking route with my dog along a wetland path running beside a residential block. Watching nature and the urban environment bleed into each other every day was the direct spark for Inner Beast's setting, and a significant part of the blockout is a direct spatial adaptation of this place.</p>
+            </div>
+            <div class="slider" id="realWorld-slider"></div>
+          </div>
+
+          <!-- Visual References -->
+          <div style="margin-bottom:0;">
+            <h4 style="font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--indigo);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px;">Visual References</h4>
+            <div class="proj-text" style="margin-bottom:16px;">
+              <p>A curated set of internet references gathered specifically for lighting, atmosphere and mood. The focus was on fog density, light filtering through trees, the contrast between natural and decayed man-made structures, and the visual language of ominous, overgrown environments.</p>
+            </div>
+            <div class="slider" id="visualRefs-slider"></div>
+          </div>
+
+        </div>
+
+        <div class="process-stage">
+          <div class="process-stage-title">2D Map and layout</div>
+          <div class="two-col text-first">
+            <div class="proj-text">
+              <p>The sketching process started from the real geography: the way the residential area where I lived connected to the wetland path behind it. Rather than designing from scratch, I mapped how those two zones actually related spatially and worked through several iterations trying to preserve that logic in a playable form: how the urban geometry gives way to the natural path, where the chokepoints fall, and how to make the route feel earned without being arbitrary. The final layout kept the essential spatial relationship of the real place.</p>
+            </div>
+            <div>
+              <div class="slider" id="slider-2dmap">
+                <div class="slider-track" id="track-2dmap">
+                  <div class="slider-slide"><img src="img/InnerBeast/evolution/layout/01.png" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/evolution/layout/01.png','img/InnerBeast/evolution/layout/02.png'],0)"></div>
+                  <div class="slider-slide"><img src="img/InnerBeast/evolution/layout/02.png" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/evolution/layout/01.png','img/InnerBeast/evolution/layout/02.png'],1)"></div>
+                </div>
+                <button class="slider-btn prev" onclick="slide('2dmap',-1)">‹</button>
+                <button class="slider-btn next" onclick="slide('2dmap',1)">›</button>
+              </div>
+              <div class="slider-dots" id="dots-2dmap"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="process-stage">
+          <div class="process-stage-title">First Blockout</div>
+          <div class="two-col img-first">
+            <div>
+              <div class="slider" id="slider-firstblockout">
+                <div class="slider-track" id="track-firstblockout">
+                  <div class="slider-slide"><img src="img/InnerBeast/process/firstBlockout.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/process/firstBlockout.png','img/InnerBeast/evolution/highlights/A/01.png'],0)"></div>
+                  <div class="slider-slide"><img src="img/InnerBeast/evolution/highlights/A/01.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/process/firstBlockout.png','img/InnerBeast/evolution/highlights/A/01.png'],1)"></div>
+                </div>
+                <button class="slider-btn prev" onclick="slide('firstblockout',-1)">‹</button>
+                <button class="slider-btn next" onclick="slide('firstblockout',1)">›</button>
+              </div>
+              <div class="slider-dots" id="dots-firstblockout"></div>
+            </div>
+            <div class="proj-text">
+              <p>The first blockout started with a flat plane in Unreal with the 2D map projected onto it, walked through it on foot to validate scale and feel before building anything. Once the proportions felt right, rough volumes were placed at each point of interest to confirm their sizes and positions relative to each other. Only after that spatial logic was locked in did the detailed per-area blocking begin.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="process-stage">
+          <div class="process-stage-title">Iterative process</div>
+          <div class="proj-text" style="margin-bottom:16px;">
+            <p>Over six weeks of playtests and peer feedback within the bootcamp, the level went through eight iterations focused on a consistent set of problems: how freely the player moved through the space, where friction appeared unintentionally, and how clearly the intended path read without explicit direction. Each session surfaced new issues: a sightline that confused rather than guided, a cover placement that broke the patrol logic, a transition that felt abrupt. Each iteration was an attempt to resolve them through the blockout alone, without adding new mechanics or systems. The goal was always the same: make the level guide the player silently, through space and composition rather than UI or text.</p>
+          </div>
+          <div class="slider" id="slider-iterative">
+            <div class="slider-track" id="track-iterative">
+              <div class="slider-slide"><img src="img/InnerBeast/iterativeProcess/01.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/iterativeProcess/01.png','img/InnerBeast/iterativeProcess/02.png','img/InnerBeast/iterativeProcess/03.png','img/InnerBeast/iterativeProcess/04.png'],0)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/iterativeProcess/02.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/iterativeProcess/01.png','img/InnerBeast/iterativeProcess/02.png','img/InnerBeast/iterativeProcess/03.png','img/InnerBeast/iterativeProcess/04.png'],1)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/iterativeProcess/03.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/iterativeProcess/01.png','img/InnerBeast/iterativeProcess/02.png','img/InnerBeast/iterativeProcess/03.png','img/InnerBeast/iterativeProcess/04.png'],2)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/iterativeProcess/04.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/iterativeProcess/01.png','img/InnerBeast/iterativeProcess/02.png','img/InnerBeast/iterativeProcess/03.png','img/InnerBeast/iterativeProcess/04.png'],3)"></div>
+            </div>
+            <button class="slider-btn prev" onclick="slide('iterative',-1)">‹</button>
+            <button class="slider-btn next" onclick="slide('iterative',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-iterative"></div>
+        </div>
+
+        <div class="process-stage">
+          <div class="process-stage-title">Polish and final touches</div>
+          <div class="proj-text" style="margin-bottom:16px;">
+            <p>The polish phase is arguably the most important, and the most surprising. After eight iterations of spatial problem-solving, it's the small details that carry the level across the finish line: a texture swap that suddenly makes a surface readable, a light aimed at the right angle that turns a dead corner into a landmark, an affordance that tells the player exactly what they can interact with without a single line of UI, or a small scripted moment that makes the world feel inhabited rather than constructed. None of these changes touch the layout, but all of them change how the level feels to play. A blockout that communicates its intent clearly through space and detail is a fundamentally different experience from one that doesn't. The gap between the two is almost entirely made up of these small, deliberate choices.</p>
+          </div>
+          <div class="slider" id="slider-polish">
+            <div class="slider-track" id="track-polish">
+              <div class="slider-slide"><img src="img/InnerBeast/polish/01.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/polish/01.png','img/InnerBeast/polish/02.png','img/InnerBeast/polish/03.png','img/InnerBeast/polish/04.png','img/InnerBeast/polish/05.png','img/InnerBeast/polish/06.png','img/InnerBeast/polish/07.png','img/InnerBeast/polish/08.png','img/InnerBeast/polish/09.png','img/InnerBeast/polish/10.png'],0)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/polish/02.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/polish/01.png','img/InnerBeast/polish/02.png','img/InnerBeast/polish/03.png','img/InnerBeast/polish/04.png','img/InnerBeast/polish/05.png','img/InnerBeast/polish/06.png','img/InnerBeast/polish/07.png','img/InnerBeast/polish/08.png','img/InnerBeast/polish/09.png','img/InnerBeast/polish/10.png'],1)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/polish/03.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/polish/01.png','img/InnerBeast/polish/02.png','img/InnerBeast/polish/03.png','img/InnerBeast/polish/04.png','img/InnerBeast/polish/05.png','img/InnerBeast/polish/06.png','img/InnerBeast/polish/07.png','img/InnerBeast/polish/08.png','img/InnerBeast/polish/09.png','img/InnerBeast/polish/10.png'],2)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/polish/04.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/polish/01.png','img/InnerBeast/polish/02.png','img/InnerBeast/polish/03.png','img/InnerBeast/polish/04.png','img/InnerBeast/polish/05.png','img/InnerBeast/polish/06.png','img/InnerBeast/polish/07.png','img/InnerBeast/polish/08.png','img/InnerBeast/polish/09.png','img/InnerBeast/polish/10.png'],3)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/polish/05.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/polish/01.png','img/InnerBeast/polish/02.png','img/InnerBeast/polish/03.png','img/InnerBeast/polish/04.png','img/InnerBeast/polish/05.png','img/InnerBeast/polish/06.png','img/InnerBeast/polish/07.png','img/InnerBeast/polish/08.png','img/InnerBeast/polish/09.png','img/InnerBeast/polish/10.png'],4)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/polish/06.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/polish/01.png','img/InnerBeast/polish/02.png','img/InnerBeast/polish/03.png','img/InnerBeast/polish/04.png','img/InnerBeast/polish/05.png','img/InnerBeast/polish/06.png','img/InnerBeast/polish/07.png','img/InnerBeast/polish/08.png','img/InnerBeast/polish/09.png','img/InnerBeast/polish/10.png'],5)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/polish/07.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/polish/01.png','img/InnerBeast/polish/02.png','img/InnerBeast/polish/03.png','img/InnerBeast/polish/04.png','img/InnerBeast/polish/05.png','img/InnerBeast/polish/06.png','img/InnerBeast/polish/07.png','img/InnerBeast/polish/08.png','img/InnerBeast/polish/09.png','img/InnerBeast/polish/10.png'],6)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/polish/08.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/polish/01.png','img/InnerBeast/polish/02.png','img/InnerBeast/polish/03.png','img/InnerBeast/polish/04.png','img/InnerBeast/polish/05.png','img/InnerBeast/polish/06.png','img/InnerBeast/polish/07.png','img/InnerBeast/polish/08.png','img/InnerBeast/polish/09.png','img/InnerBeast/polish/10.png'],7)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/polish/09.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/polish/01.png','img/InnerBeast/polish/02.png','img/InnerBeast/polish/03.png','img/InnerBeast/polish/04.png','img/InnerBeast/polish/05.png','img/InnerBeast/polish/06.png','img/InnerBeast/polish/07.png','img/InnerBeast/polish/08.png','img/InnerBeast/polish/09.png','img/InnerBeast/polish/10.png'],8)"></div>
+              <div class="slider-slide"><img src="img/InnerBeast/polish/10.png" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openLightbox(['img/InnerBeast/polish/01.png','img/InnerBeast/polish/02.png','img/InnerBeast/polish/03.png','img/InnerBeast/polish/04.png','img/InnerBeast/polish/05.png','img/InnerBeast/polish/06.png','img/InnerBeast/polish/07.png','img/InnerBeast/polish/08.png','img/InnerBeast/polish/09.png','img/InnerBeast/polish/10.png'],9)"></div>
+            </div>
+            <button class="slider-btn prev" onclick="slide('polish',-1)">‹</button>
+            <button class="slider-btn next" onclick="slide('polish',1)">›</button>
+          </div>
+          <div class="slider-dots" id="dots-polish"></div>
+        </div>
+
+        <div class="process-stage">
+          <div class="process-stage-title">Final thoughts</div>
+          <div class="proj-text">
+            <p>Inner Beast was a deliberate exercise in constraints. Choosing a simple character controller, avoiding complex scripting, limiting myself to basic physics interactions: every one of those decisions forced the design to be more interesting, not less. When you can't rely on systems to carry the experience, the space has to do the work.</p>
+            <p>The iterative process was humbling. What felt finished after the first blockout looked rough after the first playtest, and what felt finished after the fourth iteration still had problems that only became visible when someone else played it. Six playtests across eight iterations taught me that level design is fundamentally a communication problem: you're trying to make a player feel and do things without ever talking to them directly, and that no amount of solo playthroughs substitutes for watching someone else navigate your space for the first time.</p>
+            <p>The biggest lesson came from the natural environment sections. Laying out organic, open spaces is a fundamentally different challenge from designing urban or architectural ones, and my 2D map for the reserve was essentially useless once I got into the engine. The paths, the sightlines, the sense of openness: none of it translated from paper to 3D the way a building floor plan would. I spent a significant amount of time stuck, improvising in the blockout without a solid foundation to build from. That delay cascaded into the final section of the level, which never received the attention it needed: the research station interior was never completed, and the narrative ending I had envisioned never made it into the build.</p>
+            <p>That's the thing I'd do differently: spend more time understanding how to plan natural environments before touching the engine. The constraint that cost me most wasn't technical. It was a gap in my process.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Walkthrough -->
+    <div class="proj-section" id="sec-walkthrough" data-section="Walkthrough">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Level Walkthrough</h2>
+      </div>
+      <div class="walkthrough-video">
+        <div style="position:relative;width:100%;aspect-ratio:16/9;">
+        <iframe src="https://www.youtube.com/embed/0kNH7FpMj3k?rel=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="border-radius:12px;width:100%;height:100%;position:absolute;inset:0;"></iframe>
+      </div>
+      </div>
+    </div>
+
+    <!-- Gallery -->
+    <div class="proj-section" id="sec-gallery" data-section="Gallery">
+      <div class="proj-section-header">
+        <div class="proj-section-bar"></div>
+        <h2 class="proj-section-title">Level Gallery</h2>
+      </div>
+      <div class="gallery-grid">
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 0)"><img src="img/InnerBeast/evolution/highlights/A/04.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 1)"><img src="img/InnerBeast/evolution/highlights/B/04.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 2)"><img src="img/InnerBeast/areas/01_TheShelter/01.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 3)"><img src="img/InnerBeast/areas/01_TheShelter/02.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 4)"><img src="img/InnerBeast/areas/01_TheShelter/03.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 5)"><img src="img/InnerBeast/areas/01_TheShelter/04.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 6)"><img src="img/InnerBeast/areas/01_TheShelter/05.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 7)"><img src="img/InnerBeast/areas/01_TheShelter/06.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 8)"><img src="img/InnerBeast/areas/01_TheShelter/07.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 9)"><img src="img/InnerBeast/areas/02_CollapsedBridge/01.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 10)"><img src="img/InnerBeast/areas/02_CollapsedBridge/02.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 11)"><img src="img/InnerBeast/areas/02_CollapsedBridge/03.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 12)"><img src="img/InnerBeast/areas/02_CollapsedBridge/04.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 13)"><img src="img/InnerBeast/areas/02_CollapsedBridge/05.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 14)"><img src="img/InnerBeast/areas/02_CollapsedBridge/06.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 15)"><img src="img/InnerBeast/areas/02_CollapsedBridge/07.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 16)"><img src="img/InnerBeast/areas/03_WolvesDen/01.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 17)"><img src="img/InnerBeast/areas/03_WolvesDen/02.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 18)"><img src="img/InnerBeast/areas/03_WolvesDen/03.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 19)"><img src="img/InnerBeast/areas/03_WolvesDen/04.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 20)"><img src="img/InnerBeast/areas/03_WolvesDen/05.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 21)"><img src="img/InnerBeast/areas/03_WolvesDen/06.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 22)"><img src="img/InnerBeast/areas/03_WolvesDen/07.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 23)"><img src="img/InnerBeast/areas/04_ResearchStation/01.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 24)"><img src="img/InnerBeast/areas/04_ResearchStation/02.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 25)"><img src="img/InnerBeast/areas/04_ResearchStation/03.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 26)"><img src="img/InnerBeast/areas/04_ResearchStation/04.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 27)"><img src="img/InnerBeast/areas/04_ResearchStation/05.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 28)"><img src="img/InnerBeast/areas/04_ResearchStation/06.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 29)"><img src="img/InnerBeast/areas/04_ResearchStation/07.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 30)"><img src="img/InnerBeast/gallery/01.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 31)"><img src="img/InnerBeast/gallery/02.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 32)"><img src="img/InnerBeast/gallery/03.png"></div>
+        <div class="gallery-item" onclick="openLightbox(galleryImages, 33)"><img src="img/InnerBeast/gallery/04.png"></div>
+      </div>
+
+  </div><!-- /project-body -->
+
+  <footer>
+    <span class="footer-copy">© 2025 Mateo Mancera Camacho</span>
+    <span class="footer-name">Lead Level Designer</span>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+
+<!-- ─── LIGHTBOX ─────────────────────────────────────────────────────────────── -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+  <button class="lightbox-btn prev" onclick="event.stopPropagation();lightboxNav(-1)">‹</button>
+  <img id="lightbox-img" src="" alt="" onclick="event.stopPropagation()">
+  <button class="lightbox-btn next" onclick="event.stopPropagation();lightboxNav(1)">›</button>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
+
+<script>
+// ── Process gallery sliders ───────────────────────────────────────────────────
+function buildProcessGalleries() {
+  const galleries = [
+    { id: 'gameRefs-slider',   base: 'img/InnerBeast/process/gameRefs/',   count: 26 },
+    { id: 'realWorld-slider',  base: 'img/InnerBeast/process/realWorld/',  count: 4  },
+    { id: 'visualRefs-slider', base: 'img/InnerBeast/process/visualRefs/', count: 7  },
+  ];
+
+  galleries.forEach(g => {
+    const el = document.getElementById(g.id);
+    if (!el) return;
+
+    const images = Array.from({length: g.count}, (_, i) =>
+      `${g.base}${String(i+1).padStart(2,'0')}.png`
+    );
+
+    el.outerHTML = `
+      <div style="margin-bottom:8px;">
+        <div class="slider" id="${g.id}" style="position:relative;">
+          <div class="slider-track" id="${g.id}-track">
+            ${images.map((src, i) => `
+              <div class="slider-slide">
+                <img src="${src}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;"
+                  onclick="event.stopPropagation();openLightbox(${JSON.stringify(images)},${i})">
+              </div>`).join('')}
+          </div>
+          <button class="slider-btn prev" onclick="pgSlide('${g.id}',-1)">‹</button>
+          <button class="slider-btn next" onclick="pgSlide('${g.id}',1)">›</button>
+        </div>
+      </div>`;
+
+    sliderState[g.id] = { current: 0, count: images.length };
+  });
+}
+
+function pgSlide(id, dir) {
+  const s = sliderState[id];
+  if (!s) return;
+  s.current = (s.current + dir + s.count) % s.count;
+  pgUpdate(id);
+}
+function pgGo(id, idx) {
+  if (!sliderState[id]) return;
+  sliderState[id].current = idx;
+  pgUpdate(id);
+}
+function pgUpdate(id) {
+  const s = sliderState[id];
+  const track = document.getElementById(id + '-track');
+  if (track) track.style.transform = `translateX(-${s.current * 100}%)`;
+}
+
+document.addEventListener('DOMContentLoaded', buildProcessGalleries);
+setTimeout(buildProcessGalleries, 400);
+
+function slideByKey(key, dir) {
+  const s = sliderState[key];
+  if (!s) return;
+  s.current = (s.current + dir + s.count) % s.count;
+  updateSliderByKey(key);
+}
+
+function goSlideByKey(key, idx) {
+  const s = sliderState[key];
+  if (!s) return;
+  s.current = idx;
+  updateSliderByKey(key);
+}
+
+function updateSliderByKey(key) {
+  const s = sliderState[key];
+  const track = document.getElementById(key + '-track');
+  if (!track) return;
+  track.style.transform = `translateX(-${s.current * 100}%)`;
+  const dots = document.querySelectorAll(`#${key}-dots .slider-dot`);
+  dots.forEach((d, i) => d.classList.toggle('active', i === s.current));
+}
+
+document.addEventListener('DOMContentLoaded', buildProcessGalleries);
+setTimeout(buildProcessGalleries, 400);
+const galleryImages = [
+  'img/InnerBeast/evolution/highlights/A/04.png',
+  'img/InnerBeast/evolution/highlights/B/04.png',
+  'img/InnerBeast/areas/01_TheShelter/01.png',
+  'img/InnerBeast/areas/01_TheShelter/03.png',
+  'img/InnerBeast/areas/01_TheShelter/05.png',
+  'img/InnerBeast/areas/01_TheShelter/07.png',
+  'img/InnerBeast/areas/02_CollapsedBridge/01.png',
+  'img/InnerBeast/areas/02_CollapsedBridge/03.png',
+  'img/InnerBeast/areas/02_CollapsedBridge/05.png',
+  'img/InnerBeast/areas/02_CollapsedBridge/07.png',
+  'img/InnerBeast/areas/03_WolvesDen/01.png',
+  'img/InnerBeast/areas/03_WolvesDen/04.png',
+  'img/InnerBeast/areas/03_WolvesDen/07.png',
+  'img/InnerBeast/areas/04_ResearchStation/01.png',
+  'img/InnerBeast/areas/04_ResearchStation/04.png',
+  'img/InnerBeast/areas/04_ResearchStation/07.png',
+  'img/InnerBeast/gallery/01.png',
+  'img/InnerBeast/gallery/02.png',
+  'img/InnerBeast/gallery/03.png',
+  'img/InnerBeast/gallery/04.png',
+  'img/InnerBeast/polish/01.png',
+  'img/InnerBeast/polish/02.png',
+  'img/InnerBeast/polish/03.png',
+  'img/InnerBeast/polish/04.png',
+  'img/InnerBeast/polish/05.png',
+  'img/InnerBeast/polish/06.png',
+  'img/InnerBeast/polish/07.png',
+  'img/InnerBeast/polish/08.png',
+  'img/InnerBeast/polish/09.png',
+  'img/InnerBeast/polish/10.png',
+];
+
+// ── Lightbox ──────────────────────────────────────────────────────────────────
+let _lbImages = [];
+let _lbIndex = 0;
+
+function openLightbox(images, index) {
+  _lbImages = images;
+  _lbIndex = index;
+  updateLightbox();
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function updateLightbox() {
+  const img = document.getElementById('lightbox-img');
+  img.style.opacity = '0';
+  setTimeout(() => {
+    img.src = _lbImages[_lbIndex];
+    img.style.opacity = '1';
+  }, 100);
+  const counter = document.getElementById('lightbox-counter');
+  counter.textContent = _lbImages.length > 1 ? `${_lbIndex + 1} / ${_lbImages.length}` : '';
+  // Show/hide nav buttons
+  document.querySelector('.lightbox-btn.prev').style.display = _lbImages.length > 1 ? 'flex' : 'none';
+  document.querySelector('.lightbox-btn.next').style.display = _lbImages.length > 1 ? 'flex' : 'none';
+}
+
+function lightboxNav(dir) {
+  _lbIndex = (_lbIndex + dir + _lbImages.length) % _lbImages.length;
+  updateLightbox();
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+  _lbImages = [];
+}
+
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight') lightboxNav(1);
+  if (e.key === 'ArrowLeft') lightboxNav(-1);
+});
+
+// Auto-attach lightbox to all slider images — collects all images from same slider
+function attachLightbox() {
+  document.querySelectorAll('.slider').forEach(slider => {
+    const imgs = Array.from(slider.querySelectorAll('.slider-slide img'));
+    if (!imgs.length) return;
+    imgs.forEach((img, i) => {
+      img.style.cursor = 'zoom-in';
+      img.onclick = function(e) {
+        e.stopPropagation();
+        openLightbox(imgs.map(x => x.src), i);
+      };
+    });
+  });
+}
+function showPage(id) { window.location.href = 'portfolio.html'; return; //
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  if (id === 'project-page') {
+    setTimeout(() => {
+      document.getElementById('skipWidget').classList.add('visible');
+      initObserver();
+      attachLightbox();
+    }, 200);
+  } else {
+    document.getElementById('skipWidget').classList.remove('visible');
+  }
+}
+
+// ── Project data ──────────────────────────────────────────────────────────────
+const projects = {
+  astor: {
+    title: 'Astor: Blade of the Monolith',
+    genre: '3D Action RPG',
+    type: 'Full Release',
+    engine: 'Unreal Engine 5',
+    tools: 'UE5 · Blueprints · Jira',
+    role: 'Lead Level Designer'
+  },
+  crimson: {
+    title: 'Crimson Moon',
+    genre: 'Gothic Souls-like RPG',
+    type: 'In Development',
+    engine: 'Unreal Engine 5',
+    tools: 'UE5 · Blueprints · Perforce',
+    role: 'Lead Level Designer (C2)'
+  },
+  innerbeast: {
+    title: 'Inner Beast',
+    genre: '3D Action Adventure',
+    type: 'Blockout',
+    engine: 'Unreal Engine 5',
+    tools: "Unreal GASP · Max Pears' Level Design Kit",
+    role: 'Level Designer',
+    extra: '8 iterations · 6 playtests'
+  }
+};
+
+function showProject(id) {
+  const p = projects[id];
+  if (p) {
+    document.getElementById('project-title').textContent = p.title;
+    document.getElementById('meta-genre').textContent = p.genre;
+    document.getElementById('meta-type').textContent = p.type;
+    document.getElementById('meta-engine').textContent = p.engine;
+    document.getElementById('meta-tools').textContent = p.tools;
+    document.getElementById('meta-role').textContent = p.role;
+    const extraRow = document.getElementById('meta-extra-row');
+    if (p.extra) {
+      document.getElementById('meta-extra').textContent = p.extra;
+      extraRow.style.display = 'flex';
+    } else {
+      extraRow.style.display = 'none';
+    }
+  }
+  showPage('project-page');
+}
+
+// ── Scroll to section ─────────────────────────────────────────────────────────
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Sliders ───────────────────────────────────────────────────────────────────
+const sliderState = {};
+
+function initSlider(id) {
+  const track = document.getElementById('track-' + id);
+  const slides = track.children;
+  const count = slides.length;
+  sliderState[id] = { current: 0, count };
+
+  const dotsEl = document.getElementById('dots-' + id);
+  if (dotsEl) {
+    dotsEl.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const d = document.createElement('div');
+      d.className = 'slider-dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => goSlide(id, i);
+      dotsEl.appendChild(d);
+    }
+  }
+}
+
+function slide(id, dir) {
+  const s = sliderState[id];
+  s.current = (s.current + dir + s.count) % s.count;
+  updateSlider(id);
+}
+
+function goSlide(id, idx) {
+  sliderState[id].current = idx;
+  updateSlider(id);
+}
+
+function updateSlider(id) {
+  const s = sliderState[id];
+  const track = document.getElementById('track-' + id);
+  track.style.transform = `translateX(-${s.current * 100}%)`;
+
+  const dots = document.querySelectorAll(`#dots-${id} .slider-dot`);
+  dots.forEach((d, i) => d.classList.toggle('active', i === s.current));
+
+  const caption = document.getElementById('caption-' + id);
+  if (caption) {
+    const slides = track.children;
+    const slide = slides[s.current];
+    caption.textContent = slide?.dataset?.caption || slide?.textContent?.trim() || '';
+  }
+}
+
+// Init sliders on load
+initSlider('evolution');
+initSlider('highlightsA');
+initSlider('highlightsB');
+initSlider('area01');
+initSlider('area02');
+initSlider('area03');
+initSlider('area04');
+initSlider('2dmap');
+initSlider('firstblockout');
+initSlider('iterative');
+initSlider('polish');
+
+// Init observer and skip widget for standalone page
+document.addEventListener('DOMContentLoaded', function() {
+  initObserver();
+  attachLightbox();
+  const sw = document.getElementById('skipWidget');
+  if (sw) sw.classList.add('visible');
+});
+
+// ── IntersectionObserver for scroll reveal + active skip link ─────────────────
+function initObserver() {
+  const sections = document.querySelectorAll('#project-page .proj-section');
+  const skipLinks = document.querySelectorAll('#skipLinks a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        const id = entry.target.id;
+        skipLinks.forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.05, rootMargin: '0px 0px -80px 0px' });
+
+  sections.forEach(s => observer.observe(s));
+}
+
+// ── Hero video playlist ───────────────────────────────────────────────────────
+(function() {
+  const videos = [
+    'videos/heroVideos/astor.mp4',
+    'videos/heroVideos/crimson.mp4'
+  ];
+  // Start with a random video
+  let current = Math.floor(Math.random() * videos.length);
+  const vid = document.getElementById('hero-video');
+  if (!vid) return;
+
+  function loadVideo(index) {
+    vid.classList.remove('loaded');
+    vid.src = videos[index];
+    vid.load();
+    vid.play().catch(() => {});
+  }
+
+  vid.addEventListener('canplaythrough', function onReady() {
+    vid.removeEventListener('canplaythrough', onReady);
+    vid.classList.add('loaded');
+  });
+
+  vid.addEventListener('ended', function() {
+    current = (current + 1) % videos.length;
+    loadVideo(current);
+    // Re-attach canplaythrough for next video
+    vid.addEventListener('canplaythrough', function onNext() {
+      vid.removeEventListener('canplaythrough', onNext);
+      vid.classList.add('loaded');
+    });
+  });
+
+  loadVideo(current);
+})();
+
+// ── Project hero video playlist ───────────────────────────────────────────────
+(function() {
+  const clips = [
+    'videos/InnerBeast/pillars/pillar1.mp4',
+    'videos/InnerBeast/pillars/pillar2.mp4',
+    'videos/InnerBeast/pillars/pillar3.mp4',
+    'videos/InnerBeast/pillars/pillar4.mp4',
+    'videos/InnerBeast/gameplayHighlights/sneaking-around.mp4',
+  ];
+
+  function initProjectHero() {
+    const vid = document.getElementById('project-hero-video');
+    if (!vid) return;
+    let current = Math.floor(Math.random() * clips.length);
+
+    function loadClip(index) {
+      vid.style.transition = 'none';
+      vid.style.opacity = '0';
+      vid.src = clips[index];
+      vid.load();
+      vid.play().catch(() => {});
+      setTimeout(() => {
+        vid.style.transition = 'opacity 1s ease';
+        vid.style.opacity = '1';
+      }, 300);
+    }
+
+    vid.addEventListener('ended', function() {
+      current = (current + 1) % clips.length;
+      loadClip(current);
+    });
+
+    loadClip(current);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initProjectHero();
+    const pp = document.getElementById('project-page');
+    if (!pp) return;
+    const observer = new MutationObserver(() => {
+      if (pp.classList.contains('active')) initProjectHero();
+    });
+    observer.observe(pp, { attributes: true, attributeFilter: ['class'] });
+  });
+})();
+</script>
+
+</body>
+</html>
